@@ -123,6 +123,28 @@ Function TestIsDivivsibleBy27()
     print "Not Divisible by 27"
 
 
+1. to check a number palindrome.
+   Psuedo:Routine
+   Function IsPalindrome(num)
+	  int reverse=0
+	  original=num
+	  while num!=0
+		  remainder=num%10
+		  reverse=reverse*10+remainder
+		  num=num/10
+	  endwhile
+	  return(original==reverse)
+
+    Psuedo:Routine Test
+	  Function TestIsPalindrome()
+		  input num
+		  if IsPalindrome(num)
+			  print"Is Palindrome"
+		  else
+			  print"Not Palindrome"
+
+
+
 
 
 
