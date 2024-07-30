@@ -144,6 +144,30 @@ Function TestIsDivivsibleBy27()
 			  print"Not Palindrome"
 
 
+2. to check a number amstrong.
+   Psuedo:Routine
+   Function IsAmstrong(num)
+	set temp=num
+	set sum=0
+	while(num!=0)
+	   rem=num%10
+	   sum=sum+(rem*rem*rem)
+	   num=num/10
+	endwhile
+	if temp==sum
+		return True
+	else	
+		return False
+   Psuedo:Routine Test
+   Function TestIsAmstrong
+      input num
+      if IsAmstrong(num)
+         print "Amstrong"
+      else
+	 print "Not Amstrong"
+
+
+
 
 
 
