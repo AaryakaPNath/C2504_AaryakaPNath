@@ -167,6 +167,26 @@ Function TestIsDivivsibleBy27()
 	 print "Not Amstrong"
 
 
+3. to check a number prime.
+   Psuedo:Routine
+      set count=0
+      Function IsPrime(num)
+          for i from 1 to num
+	     if num%i == 0
+	         count++
+	     endif
+	  endfor
+	  if count==2
+	    print "Prime"
+	  else
+	    print "Non Prime"
+  Psuedo:Routine Test
+  Function TestIsPrime()
+	input num
+	TestIsPrime(num)
+
+
+
 
 
 
