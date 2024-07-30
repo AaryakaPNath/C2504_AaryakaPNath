@@ -186,6 +186,9 @@ Function TestIsDivivsibleBy27()
 	TestIsPrime(num)
 
 
+7. to check a number perfect number.
+
+
 
 
 
