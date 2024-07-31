@@ -112,6 +112,66 @@ Psuedo:Routine Test
                  print 'Negative Number'
      end if
 
+8. input doctorSalary/month, 
+   check if is 6 digit salary or not 
+
+   Psuedo:Routine
+   Function IsSixDigitSalaryOrNot(salary)
+        isSixDigitSalaryOrNot = (salary>=100000 && salary<=999999)
+        return isSixDigitSalaryOrNot
+
+   Psuedo:Routine Test
+   Function TestIsSixDigitSalaryOrNot()
+      input salary
+      if(IsSixDigitSalaryOrNot(salary))
+                 print 'Salary is six digit'
+      else
+                 print 'Salary is not six digit'
+      end if
+
+9. check tumour 
+                is cancerous if  malignant 
+                or not cancerous if benign
+            Note: tumour is string of text either malignant or benign
+
+Psuedo:Routine
+function IsCancerous(tumour)
+    isCancerous = (tumour == "malignant")
+    return isCancerous
+
+Psuedo:Routine Test
+Function TestIsCancerous()
+   input tumor
+   if(IsCancerous(tumor))
+               print 'malignant'
+   else
+               print 'benign'
+   end if
+
+10.else.if
+    To check the person adult, teenager or child 
+    for given age 
+
+Psuedo:Routine
+function IsAdult(age)  
+   isAdult = (age >= 18)
+   return isAdult
+function IsTeenager(age) 
+   isTeenager = (age >= 13)
+   return isTeenager; 
+
+Psuedo:Routine Test
+function TestIsAdultTeenagerOrChild(): -> None
+   Input age 
+   if(IsAdult(age)) 
+      print 'You are an adult.'
+   else if(IsTeenager(age)) 
+      print 'You are a teenager.'
+   else
+      print 'You are a child.'
+   end if
+   
+
 
   
         
