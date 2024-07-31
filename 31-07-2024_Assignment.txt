@@ -61,15 +61,57 @@ Psuedo:Routine
                  print 'It is not hot outside.'
      end if
 -------------------------------------------------------
+-------------------------------------------------------
 if else:
 5. To print the is adult or not based his/her age. 
-   function TestIsAdultNotAdult(): -> None
-        Input age 
-        if(IsAdult(age)) 
-            print 'You are an adult.'
-        else 
-            print 'You are not an adult.'
-        end if
+
+Psuedo:Routine
+   Function IsAdultNotAdult(age)
+        isAdultNotAdult = (age>=18)
+        return isAdultNotAdult
+
+Psuedo:Routine Test
+  Function TestIsAdultNotAdult()
+      input age
+      if(IsAdultNotAdult(age))
+                 print 'You are adult'
+      else
+                 print 'You are not adult'
+     end if
+
+6. Input mark, if IsMarkGreaterThan40(mark) 
+   print pass else fail 
+
+Psuedo:Routine
+   Function IsMarkGreaterThan40(mark)
+        isMarkGreaterThan40 = (mark>40)
+        return isMarkGreaterThan40
+
+Psuedo:Routine Test
+  Function TestIsMarkGreaterThan40()
+      input mark
+      if(IsMarkGreaterThan40(mark))
+                 print 'You are passed'
+      else
+                 print 'You are failed'
+     end if
+
+7. Input number, check it is positive or negative 
+   
+Psuedo:Routine
+   Function IsPositiveOrNegative(number)
+        isIsPositiveOrNegative = (number>0)
+        return isIsPositiveOrNegative
+
+Psuedo:Routine Test
+  Function TestIsPositiveOrNegativ()
+      input number
+      if(IsPositiveOrNegative(number))
+                 print 'Positive Number'
+      else
+                 print 'Negative Number'
+     end if
+
 
   
         
