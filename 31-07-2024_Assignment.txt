@@ -1,0 +1,77 @@
+simple if : 
+1. To print the one is adust based his/her age 
+   Note: Dont print if not adult.
+   
+   Psuedo:Routine
+   Function IsAdult(age)
+     isAdult = (age>=18)
+       return isAdult
+       
+   Psuedo:Routine Test
+   Function TestIsAdult()
+     input age
+     if(IsAdult(age)) 
+            print 'You are an adult.'
+     end if
+
+
+2. Take a num 10, if num greater than 5
+   print "num as 'greater than 5'"
+
+   Psuedo:Routine
+   Function CheckGreaterThan5(number)
+     checkGreaterThan5 = (number>5)
+     return checkGreaterThan5
+
+  Psuedo:Routine Test
+  Function TestCheckGreaterThan5()
+      int number=10
+      if(CheckGreaterThan5(number))
+                 print 'Number greater than 5.'
+     end if
+
+
+3. To print 'number is positive' if num > 0
+    it should not print if not positive 
+
+  Psuedo:Routine
+   Function IsPositiveOrNegative(number)
+     isPositiveOrNegative = (number>0)
+     return isPositiveOrNegative
+
+  Psuedo:Routine Test
+  Function TestIsPositiveOrNegative()
+      input number
+      if(IsPositiveOrNegative(number))
+                 print 'Number is positive.'
+     end if
+
+
+4. if temp > 25, print it is hot outside.
+
+Psuedo:Routine
+   Function IsNotHot(temperature)
+     isNotHot = (temperature>25)
+     return isNotHot
+
+  Psuedo:Routine Test
+  Function TestIsNotHot()
+      input temperature
+      if(IsNotHot(temperature))
+                 print 'It is not hot outside.'
+     end if
+-------------------------------------------------------
+if else:
+5. To print the is adult or not based his/her age. 
+   function TestIsAdultNotAdult(): -> None
+        Input age 
+        if(IsAdult(age)) 
+            print 'You are an adult.'
+        else 
+            print 'You are not an adult.'
+        end if
+
+  
+        
+     
+     
