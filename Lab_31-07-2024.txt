@@ -1,0 +1,123 @@
+1. pseudocode for calculating the total cost of items in a shopping cart, including applying a discount if the total exceeds a certain amount.
+
+BEGIN
+    DECLARE items AS ARRAY OF FLOAT
+    DECLARE total AS FLOAT
+    DECLARE discount AS FLOAT
+    DECLARE finalTotal AS FLOAT
+    DECLARE threshold AS FLOAT
+    DECLARE discountRate AS FLOAT
+ 
+    SET items = [item1, item2, item3, ..., itemN]  // Assume item1, item2, etc., are the       prices of the items
+    SET total = 0.0
+    SET threshold = 100.0  // Example threshold amount for discount
+    SET discountRate = 0.10  // Example discount rate of 10%
+ 
+    FOR EACH item IN items
+        total = total + item
+    END FOR
+ 
+    IF total > threshold THEN
+        discount = total * discountRate
+    ELSE
+        discount = 0
+    END IF
+ 
+    finalTotal = total - discount
+ 
+    PRINT "Total before discount: ", total
+    PRINT "Discount applied: ", discount
+    PRINT "Total after discount: ", finalTotal
+END
+
+
+2.pseudocode for a simple calculator that takes two numbers and an operator (+, -, *, /) as input and outputs the result of the operation.
+
+double number1
+double number2
+input char operator(=,-,*,/)
+if operator == '+'
+	double result=number1 + number2
+else if operator == '-'
+	double result=number1 - number2
+else if operator == '*'
+	double result=number1 * number2
+else operator == '/'
+	double result=number1 / number2
+return result
+  
+
+3.Write pseudocode for the FizzBuzz problem: For numbers 1 to 100, print "Fizz" for multiples of 3, "Buzz" for multiples of 5, and "FizzBuzz" for multiples of both.
+
+int i
+
+for i from 1 to 100
+   if ((i % 3== 0)and(i % 5 == 0))
+      print"FizzBuzz"
+   else  if i % 3== 0
+      print "Fizz"
+   else if i % 5 == 0
+     print "Buzz"
+   
+   end if  
+
+
+
+4.Write pseudocode to check if a given string is a palindrome.
+
+input string
+set rev=''
+for i string
+	rev=i+rev
+end for
+if rev==string
+	print'palindrome'
+else
+	print'not palindrome'
+endif
+
+5. Write pseudocode to find the maximum value in an array of integers.
+
+input an IntegerArray 'A'
+Integer max_value = A[0] 
+for each Integer x in A
+    If x > max_value
+        max_value = x 
+
+Print max_value 
+
+6.pseudocode to manage a simple bank account that allows deposits, withdrawals, and checking the balance.
+
+Initialize double balance = 0
+
+Function Deposit(amount)
+    if amount > 0
+        balance = balance + amount
+        print amount
+    else
+        print "Invalid deposit amount"
+
+Function Withdraw(amount)
+    if amount > 0 AND amount <= balance
+        balance = balance - amount
+        print amount
+    else
+        print "Invalid withdrawal amount"
+
+function CheckBalance()
+    return balance
+
+
+#Write pseudocode to find sum of first N even numbers.
+
+BEGIN
+    DECLARE n AS INTEGER
+    DECLARE i AS INTEGER
+    DECLARE sum AS INTEGER
+    FOR i in range(1,n+1)
+	IF i % 2 == 0
+	    sum = sum + i
+        END IF
+    END FOR
+    PRINT sum 
+END
