@@ -1,4 +1,4 @@
-write pseudo code for following functions and c# code for the same:
+#write pseudo code for following functions and c# code for the same:
 
 1)1. IsDoctorSalaryMin6Digits(doctorSalary)
 
@@ -21,44 +21,45 @@ function TestIsDoctorSalaryMin6Digits()
     end if
  
 C#---
-class IsDoctorSalaryMin6DigitsSarikaTwoTests
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProgrammingFundamentalsProject
 {
-        static bool IsDoctorSalaryMin6Digits(int doctorSalary)
+    internal class Program
     {
-        int salary = doctorSalary;
-
-        int count = 0;
-        while (salary > 0)
+        static void Main(string[] args)
         {
-            int digit = salary % 10;
-            count += 1;
-            salary = salary / 10;
+            Console.Write("Enter the Salary of doctor:");
+            int Salary = int.Parse(Console.ReadLine());
+                if(IsDoctorSalaryMin6Digits(Salary))
+                {
+                    Console.WriteLine("Doctor is having salary of 6 digits");
+                }
+            Console.ReadKey(); 
+        }
+        static bool IsDoctorSalaryMin6Digits(int Salary)
+        {
+
+            int count = 0;
+            while (Salary > 0)
+            {
+                int digit = Salary % 10;
+                count += 1;
+                Salary = Salary / 10;
+            }
+            return count >= 6;
         }
 
-        return count >= 6;
-    }
-           static void TestIsDoctorSalaryMin6Digits()
-    {
-        Console.WriteLine("Enter doctor salary:");
-        int doctorSalary = int.Parse(Console.ReadLine());
-        if (IsDoctorSalaryMin6Digits(doctorSalary))
-        {
-            Console.WriteLine("Doctor gets Min 6 digits salary");
-        }
-    }
-    static void Main(string[] args) //user: p
-    {
-        Console.WriteLine("--------------------TestIsDoctorSalaryMin6Digits--------------------");
-        TestIsDoctorSalaryMin6Digits();
-        Console.WriteLine("--------------------End of TestIsDoctorSalaryMin6Digits--------------------");
-        Console.WriteLine("Press any key to contine...");
-        Console.ReadKey();
     }
 }
 
 2) 2. TestIsDoctorSalaryMin6Digits
 
-Psuedocode
+Psuedocode----
 function IsDoctorSalaryMin6Digits(doctorSalary) 
         salary = doctorSalary
 
@@ -78,39 +79,47 @@ function TestIsDoctorSalaryMin6DigitsOrNot()
         print "Doctor does not get Min 6 digits salary"
     end if 
 
-C#
-class IsDoctorSalaryMin6DigitsSarikaTwoTests
+C#----
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProgrammingFundamentalsProject
 {
-        static bool IsDoctorSalaryMin6Digits(int doctorSalary)
+    internal class Program
     {
-        int salary = doctorSalary;
-
-        int count = 0;
-        while (salary > 0)
+        static void Main(string[] args)
         {
-            int digit = salary % 10;
-            count += 1;
-            salary = salary / 10;
+            Console.Write("Enter the Salary of doctor:");
+            int Salary = int.Parse(Console.ReadLine());
+            if (IsDoctorSalaryMin6Digits(Salary))
+                {
+                    Console.WriteLine("Doctor is having salary of 6 digits");
+                }
+            else
+                {
+                Console.WriteLine("Doctor is not having salary of 6 digits");
+                }   
+            Console.ReadKey(); 
+        }
+        static bool IsDoctorSalaryMin6Digits(int Salary)
+        {
+
+            int count = 0;
+            while (Salary > 0)
+            {
+                int digit = Salary % 10;
+                count += 1;
+                Salary = Salary / 10;
+            }
+            return count >= 6;
         }
 
-        return count >= 6;
     }
-static void TestIsDoctorSalaryMin6Digits()
-    {
-        Console.WriteLine("Enter doctor salary:");
-        int doctorSalary = int.Parse(Console.ReadLine());
-        if (IsDoctorSalaryMin6Digits(doctorSalary))
-        {
-            Console.WriteLine("Doctor gets Min 6 digits salary");
-        }
-    }
-    static void Main(string[] args) //user: p
-    { Console.WriteLine("--------------------TestIsDoctorSalaryMin6DigitsOrNot--------------------");
-        TestIsDoctorSalaryMin6DigitsOrNot();
-        Console.WriteLine("--------------------End of TestIsDoctorSalaryMin6Digits--------------------");
-        Console.WriteLine("Press any key to contine...");
-        Console.ReadKey();
-    }
+}
 
 3) TestIsDoctorSalaryMin6DigitsOrNot
 Psuedocode
