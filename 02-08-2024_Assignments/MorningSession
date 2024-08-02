@@ -167,3 +167,6 @@ internal class Program
     }
 } 
 }
+P2. print the N th term in the series 21, 22, 24, 27, 31, ...
+Q1-Using while loop
+
