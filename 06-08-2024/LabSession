@@ -1,5 +1,7 @@
 CREATE DATABASE demo_db;
+
 USE demo_db;
+
 IF NOT EXISTS(SELECT * FROM sys.tables
 WHERE[name] = 'student')
 	CREATE TABLE student(
@@ -26,49 +28,41 @@ IF OBJECT_ID('dbo.mark') IS NULL
 )
 INSERT INTO student(first_name, last_name, email)
 VALUES
-('John','Doe','john.doe@example.com'),
-('Alice', 'Smith', 'alice.smith@example.com'),
-('Bob', 'Johnson', 'bob.johnson@example.com');
+('john', 'deo', 'johndoe@gmail.com'),
+('jane', 'smith', 'jjanesmith@gmail.com'),
+('michael', 'brown', 'michaelbrown@gmail.com');
 
-INSERT INTO subject([name])
+SELECT * FROM student;
+
+INSERT INTO subject(name)
 VALUES
-('Mathematics'),
-('Physics'),
-('Chemistry'),
-('Biology'),
-('History'),
-('Geography'),
-('English Literature'),
-('Computer Science'),
-('Economics'),
-('Political Science');
+('chemistry'),
+('math'),
+('computer science');
+
+SELECT * FROM subject;
 
 INSERT INTO mark(student_id, subject_id, mark)
 VALUES
-(1, 1, 85),
-(1, 2, 90),
-(1, 3, 88),
-(2, 1, 78),
-(2, 4, 92),
-(2, 5, 81),
-(3, 2, 75),
-(3, 3, 89),
-(3, 6, 95),
-(1, 4, 83),  
-(1, 5, 77),  
-(1, 6, 86),  
-(2, 5, 90),  
-(2, 6, 88),  
-(3, 6, 92);
+('1','1','80'),
+('1','2','90'),
+('1','3','86'),
+('2','1','55'),
+('2','3','75'),
+('2','3','25'),
+('3','1','80'),
+('3','2','60'),
+('3','3','34');
 
-SELECT 
-	student.id AS student_id,
-	mark.id AS mark_id,
-	student.first_name,
-	student.last_name,
-	mark.mark,
-	mark.subject_id,
-	subject.name
+SELECT * FROM mark;
+
+SELECT * FROM mark WHERE student_id=(SELECT id FROM student WHERE email  ='johndoe@gmail.com');
+
+SELECT student.id as STUDENT_ID, mark.id as MARK_ID, student.first_name, student.last_name, mark.mark, mark.subject_id from student
+INNER JOIN mark
+ON student.id = mark.student_id;
+
+SELECT student.id as STUDENT_ID, mark.id as MARK_ID, student.first_name, student.last_name, mark.mark, mark.subject_id , subject.name 
 FROM student
 INNER JOIN mark ON student.id = mark.student_id
-INNER JOIN subject ON mark.subject_id = subject.id;
+INNER JOIN subjects ON mark.subject_id= subjects.id;
