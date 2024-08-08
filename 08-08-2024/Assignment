@@ -1,8 +1,38 @@
 #ASSIGNMENT-SQL
 
-#Introduction to database and RDBMS, Characteristics of Database Management System, Data modelling, Relational Data modelling, Normalization, Transaction, Types of Keys
+------Introduction to database and RDBMS, Characteristics of Database Management System, Data modelling, Relational Data modelling, Normalization, Transaction, Types of Keys
+1.Explain the difference between a database and a DBMS. Can a DBMS exist without a database?
 
-#Introduction to SQL, SQL Datatypes, SQL Commands (DDL, DML, TCL), SQL Operator, SQL Table, Select Statement, Insert Statement, Update Statement, DeleteStatement
+Database: A database is an organized collection of data, typically stored and accessed electronically from a computer system.
+
+A Database Management System (DBMS) is software that interacts with users, applications, and the database itself to capture and analyze data.
+
+DBMS without a Database: Technically, a DBMS can exist without containing a database. It is the software component that manages databases, 
+and until a database is created or connected to it, it doesn't manage any data.
+
+2.How would you handle many-to-many relationships in a relational database model?
+
+Many-to-many relationships in a relational database are handled by creating a join table (also called a junction table or associative entity) 
+that contains foreign keys referencing the primary keys of the two tables involved in the relationship. 
+This join table breaks down the many-to-many relationship
+
+3.What is denormalization, and when would you consider using it?
+
+Denormalization: The process of deliberately introducing redundancy into a database by merging tables or duplicating data.
+This is the opposite of normalization, which removes redundancy to improve data integrity and reduce anomalies.
+
+When to Use: Denormalization may be considered in scenarios where read performance is more critical than write performance.
+For example, in a read-heavy application like a reporting system or a data warehouse, denormalization can reduce the complexity of queries and 
+improve performance by minimizing the need for joins.
+
+4.What is a composite key, and how does it differ from a composite index?
+
+Composite Key: A primary key that consists of two or more columns used together to uniquely identify a row in a table
+
+Composite Index: An index that is based on multiple columns of a table. While it can be used to enforce uniqueness like a composite key, 
+its primary purpose is to improve query performance by allowing the database to quickly locate rows based on multiple column values.
+
+-----Introduction to SQL, SQL Datatypes, SQL Commands (DDL, DML, TCL), SQL Operator, SQL Table, Select Statement, Insert Statement, Update Statement, DeleteStatement
 1. What is SQL and what are its primary functions?
 
  SQL stands for Structured Query Language. 
@@ -134,7 +164,8 @@ Commonly used data types include : INT, FLOAT, CHAR, VARCHAR, DATE, BOOLEAN
  DCL : Data Control Language 
         GRANT the privileges to the database user 
         REVOKE the privileges from the database user
----Views, Sub Queries
+
+-----Views, Sub Queries
 1.What is a SQL view?
 A SQL view is a virtual table that is based on the result of a SQL query. It provides a way to simplify complex queries, encapsulate complex joins and aggregations, and provide a more secure and user-friendly way to access data.
 
@@ -189,8 +220,7 @@ SELECT column1, column2
 FROM table_name
 WHERE condition;
 
-
-----Aggregate Function, SQL Joins
+-----Aggregate Function, SQL Joins
 1.What is the difference between COUNT(*) and COUNT(column_name)?
 
 Answer:
