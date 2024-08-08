@@ -1,23 +1,159 @@
 #ASSIGNMENT-SQL
 
+#Introduction to database and RDBMS, Characteristics of Database Management System, Data modelling, Relational Data modelling, Normalization, Transaction, Types of Keys
+
+#Introduction to SQL, SQL Datatypes, SQL Commands (DDL, DML, TCL), SQL Operator, SQL Table, Select Statement, Insert Statement, Update Statement, DeleteStatement
+1. What is SQL and what are its primary functions?
+
+ SQL stands for Structured Query Language. 
+ It's used to interact with databases.
+ Its primary functions are to query data (retrieve), insert new data, update existing data, and delete data.
+
+2.RDBMS non-RDBMS
+
+ A relational database uses tables to store data with rows and columns, and relationships are established using keys. 
+ A non-relational database uses different structures (e.g., documents, graphs) and is more flexible with schema.
+
+3. What is the difference between CHAR and VARCHAR datatypes?
+
+ CHAR is for fixed-length strings (e.g., CHAR(10) always takes up 10 characters).
+ VARCHAR is for variable-length strings (e.g., VARCHAR(10) uses only as many characters as needed, up to 10).
+
+
+4. What are alter and Delete table
+  
+ ALTER TABLE changes the structure of an existing table (e.g., adding a column). 
+ DROP TABLE deletes the table and all its data permanently.
+
+5.How does the COMMIT command work in transaction control?
+
+ COMMIT saves all changes made in a transaction to the database, making them permanent.
+
+6.Can you give an example of a ROLLBACK and explain when you might use it?
+
+ROLLBACK undoes changes made during a transaction if there’s an error or if the changes are not needed. 
+For example, if you accidentally update data incorrectly, you can use ROLLBACK to undo the changes.
+
+7. What are some common SQL comparison operators, and how are they used in queries?
+
+Common operators are =, != (or <>), >, <, >=, and <=. 
+They compare values in queries to filter results (e.g., WHERE age > 30).
+
+8. How does the BETWEEN operator work, and what types of values can it be used with?
+
+BETWEEN checks if a value falls within a range (e.g., age BETWEEN 20 AND 30). 
+It can be used with numbers, dates, and text.
+
+9. Explain the difference between AND and OR operators in SQL queries.
+
+AND requires all conditions to be true for a row to be selected. 
+OR requires at least one condition to be true.
+
+10. What is a primary key, and why is it important in a table?
+
+A primary key is a unique identifier for each row in a table, ensuring that each record is unique.
+
+11. How would you define a foreign key?
+
+A foreign key is a column that refers to the primary key of another table, creating a relationship between the tables and ensuring referential integrity.
+
+12. Explain the concept of normalization and why it's important?
+
+Normalization is the process of organizing data to reduce redundancy and improve data integrity. 
+It involves dividing tables into related ones to minimize duplication.
+
+
+13. What is the purpose of the ORDER BY clause, and how would you use it to sort results?
+
+ORDER BY sorts the query results by one or more columns 
+(e.g., ORDER BY salary DESC sorts salaries in descending order).
+
+14.Explain the use of GROUP BY in SQL and provide an example scenario where it might be used.
+
+GROUP BY groups rows with the same values in specified columns into summary rows (e.g., GROUP BY department groups employees by department).
+
+15. What is the difference between INSERT INTO table VALUES (values) and INSERT INTO table (columns) VALUES (values)?
+
+  The first form assumes you’re inserting values for all columns in the table in the order they are defined. 
+  The second form allows you to specify which   columns you’re inserting values for, and in any order.
+
+16. Write a query to update the salary of an employee with id = 5 to 70000.
+
+ UPDATE employees
+ SET salary = 70000
+ WHERE id = 5;
+ 
+17. What precautions should you take when using the UPDATE statement to avoid unintended changes?
+
+Always use a WHERE clause to specify which rows to update. Without it, all rows in the table will be updated.
+
+18. How would you write a query to delete records from a table where status = 'inactive'?
+
+  DELETE FROM table_name
+  WHERE status = 'inactive';
+ 
+19. What is the risk of running a DELETE statement without a WHERE clause?
+
+It will delete all records in the table, which can result in the loss of all data in that table.
+
+20. Explain the difference between DELETE and TRUNCATE. When would you use each?
+
+DELETE removes rows one by one and can use a WHERE clause. 
+TRUNCATE removes all rows quickly without logging individual row deletions. 
+Use DELETE for selective removal and TRUNCATE for a fast, complete wipe of a table.
+
+21. Difference between drop and truncate
+
+ DROP removes all data along with the entire table structure is removed.
+ TRUNCATE removes all data in the table but the table structure remains.
+
+22. What are all datatypes used in SQL
+
+ * Numeric Data Types
+* Character Strings
+* Unicode Character Strings
+* Date and Time
+* Binary Data
+Commonly used data types include : INT, FLOAT, CHAR, VARCHAR, DATE, BOOLEAN
+
+23. What are all SQL commands in SQL
+
+ DDL : Data Definition Language : objects like table, view, procedure, trigger etc
+        CREATE TABLE, CREATE PROCEDURE, CREATE VIEW 
+        DROP TABLE
+        ALTER TABLE 
+        TRUCATE TABLE 
+		
+ DML : Data Manipulation Language : 
+        INSERT, UPDATE, DELETE 
+        "SELECT" <- DQL - Data Query Language 
+		
+ TCL : Transaction Control Language 
+        commands: BEGIN TRANSACTION, COMMIT, ROLLBACK, SAVEPOINT
+		
+ DCL : Data Control Language 
+        GRANT the privileges to the database user 
+        REVOKE the privileges from the database user
 ---Views, Sub Queries
 1.What is a SQL view?
 A SQL view is a virtual table that is based on the result of a SQL query. It provides a way to simplify complex queries, encapsulate complex joins and aggregations, and provide a more secure and user-friendly way to access data.
 
-2.What is the difference between a view and a table?
+2.What is a subquery?
+A subquery is a query nested inside another query. It can be used to return results that are then used by the outer query. Subqueries can be placed in various clauses like WHERE, FROM, or SELECT.
+
+
+3.What is the difference between a view and a table?
 A table is a physical storage of data, while a view is a virtual representation of data derived from one or more tables. Views do not store data themselves but provide a way to query and present data.
 
-3.What is the difference between a subquery and a join?
+4.What is the difference between a subquery and a join?
 A subquery is a query nested inside another query, while a join combines rows from two or more tables based on related columns. Joins are often used to combine data from multiple tables, while subqueries can be used for more complex filtering and calculations.
 
-4.Discuss the potential security benefits of using views in a database.
-Restricted Access: Views can be used to present only specific columns of a table, hiding sensitive or irrelevant information. This allows for more granular control over what users can see and access.
+5.What are the benefits of using views?
+Data Abstraction: Users interact with data through the view without needing to understand the underlying table structure.
+Security: Views can restrict access to specific columns or rows.
+Simplicity: Views can simplify complex queries by encapsulating them.
 
-Row-Level Security: By applying filters in a view, you can restrict access to only certain rows of a table based on user roles or permissions. 
-
-Encapsulation: Views can encapsulate complex queries and calculations, preventing users from directly querying or modifying the underlying tables. This can help protect against accidental or unauthorized data changes.
-
-5.When would you prefer a subquery over a join, and why?
+6.When would you prefer a subquery over a join, and why?
 Filtering Based on Aggregate Results: When you need to filter results based on aggregate values or calculations, a subquery can be useful. For example, you might use a subquery to find all employees who earn more than the average salary:
 
 SELECT EmployeeID, Name
@@ -25,6 +161,34 @@ FROM Employees
 WHERE Salary > (SELECT AVG(Salary) FROM Employees);
 
 Nested Queries: Subqueries can be useful for querying results that depend on complex conditions or multiple levels of filtering, where joins might become too complex or less readable.
+
+7.How do you use a subquery in the FROM clause?
+SELECT * FROM (SELECT department_id, COUNT(*) AS num_employees
+                FROM employees
+                GROUP BY department_id) AS dept_summary
+WHERE num_employees > 10;
+
+8.What is a subquery?
+A subquery is a query nested inside another query. It can be used to return results that are then used by the outer query. Subqueries can be placed in various clauses like WHERE, FROM, or SELECT.
+
+9.What are some limitations of views?
+
+Limitations include:
+Performance Issues: Views can sometimes cause performance overhead due to their complexity.
+Updatability: Not all views are updatable, especially those involving multiple tables or complex calculations.
+Dependence on Base Tables: If base tables change, views may need to be updated.
+
+10.What are the different types of subqueries?
+Scalar Subquery: Returns a single value (e.g., SELECT MAX(salary) FROM employees).
+Multi-row Subquery: Returns multiple rows (e.g., SELECT * FROM employees WHERE department_id IN (SELECT department_id FROM departments WHERE location = 'New York')).
+Correlated Subquery: References columns from the outer query (e.g., SELECT e1.name FROM employees e1 WHERE e1.salary > (SELECT AVG(salary) FROM employees e2 WHERE e1.department_id = e2.department_id)).
+
+11.How do you create a view in SQL?
+CREATE VIEW view_name AS
+SELECT column1, column2
+FROM table_name
+WHERE condition;
+
 
 ----Aggregate Function, SQL Joins
 1.What is the difference between COUNT(*) and COUNT(column_name)?
