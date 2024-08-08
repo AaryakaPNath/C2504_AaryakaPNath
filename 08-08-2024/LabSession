@@ -1,0 +1,33 @@
+CREATE DATABASE demo_db;
+
+USE demo_db;
+
+IF NOT EXISTS(SELECT * FROM sys.tables
+WHERE[name] = 'student')
+	CREATE TABLE student(
+		id INT PRIMARY KEY IDENTITY,
+		first_name NVARCHAR(50) NOT NULL,
+		last_name NVARCHAR(50) NOT NULL,
+		email NVARCHAR(100) NOT NULL UNIQUE,
+)
+INSERT INTO student(first_name, last_name, email)
+VALUES
+('john', 'deo', 'johndoe@gmail.com'),
+('jane', 'smith', 'jjanesmith@gmail.com'),
+('michael', 'brown', 'michaelbrown@gmail.com');
+
+--------------PROCEDURE----------------
+CREATE PROCEDURE sp_NewStudent
+	@FirstName VARCHAR(50),
+	@LastName VARCHAR(50),
+	@Email VARCHAR(100)
+AS
+BEGIN
+	INSERT INTO student(first_name,last_name,email)
+	VALUES (@FirstName,@LastName,@Email)
+END
+
+EXEC sp_NewStudent
+	@FirstName = 'New',
+	@LastName = 'Student',
+	@Email = 'newstudent@gmail.com'
