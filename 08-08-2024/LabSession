@@ -31,3 +31,24 @@ EXEC sp_NewStudent
 	@FirstName = 'New',
 	@LastName = 'Student',
 	@Email = 'newstudent@gmail.com'
+
+------------HTML----------------------
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Web page</title>
+        <style>
+            code{
+                background-color: #e7e7e7;
+                padding: 3px;
+                border-radius: 5px;
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Use <code>Console.WriteLine()</code> to display 
+            text to console.</p>
+    </body>
+</html>
+
