@@ -7,7 +7,7 @@
     <body>
         <p id="'p1">This is a paragraph</p>
         <p id="'p1">This is a paragraph</p>
-        ------------anchor tag------------------------
+------------anchor tag------------------------
         <a href="https://www.google.com">Visit Google</a>
         <a href="contact.html">Contact Us</a>
         <a href="contact.html" target="_blank">Contact Us New Tab</a>
