@@ -1,0 +1,29 @@
+1. Find the Total Number of Orders and Total Order Value by Customer
+Problem: Given an `Orders` table,
+find the total number of orders and
+total order value for each customer.
+
+2. Find the Second Highest Salary
+Problem: Given an `Employees` table
+with columns `EmployeeID`, `Name`, and `Salary`,
+find the second highest salary.
+
+3. Find Employees Who Report to More Than One Manager
+Problem: Given an `Employees` table
+with columns `EmployeeID`, `Name`, and `ManagerID`,
+find employees who report to more than one manager.
+
+4. Find Total Sales per Month
+Problem: Given a `Sales` table
+with columns `SaleAmount` and `SaleDate`,
+find the total sales amount for each month.
+
+5. Find the Top N Salespersons by Sales
+Problem:
+Given a table `Sales`
+with columns `SalesPersonID`, `SaleAmount`, and `SaleDate`,
+find the top 3 salespersons by total sales amount.
+
+
+
+
