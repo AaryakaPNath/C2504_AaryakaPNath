@@ -51,11 +51,18 @@ Problem:
 Given a table `Sales`
 with columns `SalesPersonID`, `SaleAmount`, and `SaleDate`,
 find the top 3 salespersons by total sales amount.
+Table Structure:
+```
+CREATE TABLE Sales (
+SalesPersonID INT,
+SaleAmount DECIMAL(10, 2),
+SaleDate DATE
+);
 
-SELECT TOP 3 SalesPersonID, SUM(SaleAmount) AS TotalSales
+SELECT TOP 3 SalesPersonID
 FROM Sales
 GROUP BY SalesPersonID
-ORDER BY TotalSales DESC;
+ORDER BY SUM(SaleAmount) DESC;
 
 
 
