@@ -1,0 +1,147 @@
+#Class&Object
+1.
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TotalSalary
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var p1 = new Employee();
+            {
+                p1.FullName = "Person1";
+                p1.salary = 10_000;
+                p1.bonus = 500;
+            }
+            p1.TotalSalary();
+        }
+    }
+}
+using System;
+
+namespace TotalSalary
+{
+    class Employee
+    {
+        public string FullName;
+        public int salary;
+        public int bonus;
+
+        public void TotalSalary()
+        {
+            Console.WriteLine(salary+bonus);
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+2.
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TotalAvgMarks
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Student student = new Student();
+            {
+                student.mark1 = 10;
+                student.mark2 = 20;
+                student.mark3 = 30;
+            }
+            student.TotalMarks();
+            student.AverageMarks();
+           
+        }
+    }
+}
+using System;
+
+namespace TotalAvgMarks
+{
+    class Student
+    {
+        public int mark1;
+        public int mark2;
+        public int mark3;
+
+        public void TotalMarks()
+        {   
+
+            Console.WriteLine(mark1+mark2+mark3);
+        }
+        public void AverageMarks()
+        {
+            Console.WriteLine((mark1 + mark2 + mark3) / 3);
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+#3.SimpleCalculator
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SimpleCalculator
+{
+    class Calculator
+    {
+        public int num1;
+        public int num2;
+        public void Add()
+        {
+            Console.WriteLine($"Addition {num1 + num2}");
+        }
+        public void Sub()
+        {
+            Console.WriteLine($"Subtraction {num1 - num2}");
+        }
+        public void Mul()
+        {
+            Console.WriteLine($"Multiplication {num1 * num2}");
+        }
+        public void Div()
+        {
+            if (num2 > 0)
+            {
+                Console.WriteLine($"Division  {num1 / num2}");
+            }
+            else
+            {
+                Console.WriteLine("error");
+            }
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Calculator cal = new Calculator
+            {
+                num1 = 10,
+                num2 = 5
+            };
+            cal.Add();
+            cal.Sub();
+            cal.Mul();
+            cal.Div();
+
+
+            Console.ReadKey();
+        }
+    }
+}
+
+
