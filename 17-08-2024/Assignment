@@ -1,0 +1,173 @@
+1. Implement an Abstract Class with Method Overriding
+   - Task: Create an abstract class `Employee` with an abstract method `CalculateSalary()`. Derive two classes `FullTimeEmployee` and `PartTimeEmployee` from `Employee`.
+   - Requirements:
+     - `FullTimeEmployee` should have properties `BaseSalary` and `BonusPercentage`. Implement the `CalculateSalary()` method to return the total salary, including bonus.
+     - `PartTimeEmployee` should have properties `HourlyRate` and `HoursWorked`. Implement the `CalculateSalary()` method to return the total earnings based on hours worked.
+   - Example:
+     ```csharp
+     Employee fullTime = new FullTimeEmployee(50000, 0.1); 
+     Console.WriteLine(fullTime.CalculateSalary());  // Output: 55000
+
+     Employee partTime = new PartTimeEmployee(20, 80); 
+     Console.WriteLine(partTime.CalculateSalary());  // Output: 1600
+     ```
+
+     1. Abstract Class with Method Overriding
+
+
+using System;
+
+abstract class Employee
+{
+    public abstract decimal CalculateSalary();
+}
+
+class FullTimeEmployee : Employee
+{
+    public decimal BaseSalary { get; set; }
+    public decimal BonusPercentage { get; set; }
+
+    public FullTimeEmployee(decimal baseSalary, decimal bonusPercentage)
+    {
+        BaseSalary = baseSalary;
+        BonusPercentage = bonusPercentage;
+    }
+
+    public override decimal CalculateSalary()
+    {
+        return BaseSalary + (BaseSalary * BonusPercentage);
+    }
+}
+
+class PartTimeEmployee : Employee
+{
+    public decimal HourlyRate { get; set; }
+    public int HoursWorked { get; set; }
+
+    public PartTimeEmployee(decimal hourlyRate, int hoursWorked)
+    {
+        HourlyRate = hourlyRate;
+        HoursWorked = hoursWorked;
+    }
+
+    public override decimal CalculateSalary()
+    {
+        return HourlyRate * HoursWorked;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Employee fullTime = new FullTimeEmployee(50000, 0.1m);
+        Console.WriteLine(fullTime.CalculateSalary());  // Output: 55000
+
+        Employee partTime = new PartTimeEmployee(20, 80);
+        Console.WriteLine(partTime.CalculateSalary());  // Output: 1600
+    }
+}
+
+
+
+2. Design a Class Hierarchy with Interfaces
+   - Task: Create an interface `IDrawable` with a method `Draw()`. Create a base class `Graphic` that implements `IDrawable` and has a method `Resize()`. Derive two classes `Line` and `Polygon` from `Graphic`.
+   - Requirements:
+     - `Line` should have properties `StartPoint` and `EndPoint`. Implement the `Draw()` method to draw a line.
+     - `Polygon` should have a property `Vertices` (a list of points). Implement the `Draw()` method to draw a polygon.
+     - Implement the `Resize()` method in both derived classes to adjust their dimensions.
+   - Example:
+     ```csharp
+     IDrawable line = new Line(new Point(0, 0), new Point(10, 10));
+     line.Draw(); // Draws a line from (0,0) to (10,10)
+
+     Graphic polygon = new Polygon(new List<Point> { new Point(0, 0), new Point(10, 0), new Point(10, 10), new Point(0, 10) });
+     polygon.Resize(2); // Resize polygon
+     polygon.Draw(); // Draws the resized polygon
+
+     2. Class Hierarchy with Interfaces
+
+
+using System;
+using System.Collections.Generic;
+
+interface IDrawable
+{
+    void Draw();
+}
+
+abstract class Graphic : IDrawable
+{
+    public abstract void Draw();
+
+    public void Resize(double scaleFactor)
+    {
+        // Implement resizing logic if needed
+    }
+}
+
+class Line : Graphic
+{
+    public Point StartPoint { get; set; }
+    public Point EndPoint { get; set; }
+
+    public Line(Point startPoint, Point endPoint)
+    {
+        StartPoint = startPoint;
+        EndPoint = endPoint;
+    }
+
+    public override void Draw()
+    {
+        Console.WriteLine($"Drawing line from {StartPoint} to {EndPoint}");
+    }
+}
+
+class Polygon : Graphic
+{
+    public List<Point> Vertices { get; set; }
+
+    public Polygon(List<Point> vertices)
+    {
+        Vertices = vertices;
+    }
+
+    public override void Draw()
+    {
+        Console.WriteLine("Drawing polygon with vertices:");
+        foreach (var vertex in Vertices)
+        {
+            Console.WriteLine(vertex);
+        }
+    }
+}
+
+class Point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString()
+    {
+        return $"({X}, {Y})";
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        IDrawable line = new Line(new Point(0, 0), new Point(10, 10));
+        line.Draw(); // Output: Drawing line from (0,0) to (10,10)
+
+        Graphic polygon = new Polygon(new List<Point> { new Point(0, 0), new Point(10, 0), new Point(10, 10), new Point(0, 10) });
+        polygon.Resize(2); // Resize polygon (method can be implemented)
+        polygon.Draw(); // Output: Drawing polygon with vertices: (0,0) (10,0) (10,10) (0,10)
+    }
+}
