@@ -85,7 +85,7 @@ class Program
      polygon.Resize(2); // Resize polygon
      polygon.Draw(); // Draws the resized polygon
 
-     2. Class Hierarchy with Interfaces
+2. Class Hierarchy with Interfaces
 
 
 using System;
@@ -171,3 +171,264 @@ class Program
         polygon.Draw(); // Output: Drawing polygon with vertices: (0,0) (10,0) (10,10) (0,10)
     }
 }
+
+3. Create an Abstract Base Class with a Template Method
+   - Task: Implement an abstract class `Report` with a method `GenerateReport()` that calls two methods `CreateHeader()` and `CreateBody()`. Derive classes `AnnualReport` and `MonthlyReport` from `Report`.
+   - Requirements:
+     - `AnnualReport` should override `CreateHeader()` and `CreateBody()` to provide a header and body for an annual report.
+     - `MonthlyReport` should override `CreateHeader()` and `CreateBody()` to provide a header and body for a monthly report.
+   - Example:
+     ```csharp
+     Report annual = new AnnualReport();
+     annual.GenerateReport(); // Output: Annual report header and body
+
+     Report monthly = new MonthlyReport();
+     monthly.GenerateReport(); // Output: Monthly report header and body
+
+
+3. Abstract Base Class with a Template Method
+
+using System;
+
+abstract class Report
+{
+    public void GenerateReport()
+    {
+        CreateHeader();
+        CreateBody();
+        CreateFooter();
+    }
+
+    protected abstract void CreateHeader();
+    protected abstract void CreateBody();
+    protected virtual void CreateFooter()
+    {
+        Console.WriteLine("Creating footer...");
+    }
+}
+
+class AnnualReport : Report
+{
+    protected override void CreateHeader()
+    {
+        Console.WriteLine("Creating annual report header...");
+    }
+
+    protected override void CreateBody()
+    {
+        Console.WriteLine("Creating annual report body...");
+    }
+}
+
+class MonthlyReport : Report
+{
+    protected override void CreateHeader()
+    {
+        Console.WriteLine("Creating monthly report header...");
+    }
+
+    protected override void CreateBody()
+    {
+        Console.WriteLine("Creating monthly report body...");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Report annual = new AnnualReport();
+        annual.GenerateReport(); 
+        // Output: Creating annual report header...
+        //         Creating annual report body...
+        //         Creating footer...
+
+        Report monthly = new MonthlyReport();
+        monthly.GenerateReport(); 
+        // Output: Creating monthly report header...
+        //         Creating monthly report body...
+        //         Creating footer...
+    }
+}
+
+4. Design a Class Hierarchy with Abstract Methods and Interfaces
+   - Task: Create an abstract class `Vehicle` with an abstract method `Drive()`. Create an interface `IFuel` with a method `Refuel()`. Derive classes `Car` and `Motorcycle` from `Vehicle` and implement `IFuel`.
+   - Requirements:
+     - `Car` should have properties `FuelLevel` and `TankCapacity`. Implement the `Drive()` method to simulate driving and `Refuel()` to refill the tank.
+     - `Motorcycle` should have properties `FuelLevel` and `TankCapacity`. Implement the `Drive()` method to simulate driving and `Refuel()` to refill the tank.
+   - Example:
+     ```csharp
+     Vehicle car = new Car(10, 50);
+     car.Drive(); // Output: Car is driving
+     (car as IFuel).Refuel(20); // Output: Car is refueled
+
+     Vehicle motorcycle = new Motorcycle(5, 15);
+     motorcycle.Drive(); // Output: Motorcycle is driving
+     (motorcycle as IFuel).Refuel(10); // Output: Motorcycle is refueled
+
+4. Abstract Methods and Interfaces
+
+
+using System;
+
+interface IFuel
+{
+    void Refuel(decimal amount);
+}
+
+abstract class Vehicle : IFuel
+{
+    public abstract void Drive();
+
+    public abstract void Refuel(decimal amount);
+}
+
+class Car : Vehicle
+{
+    public decimal FuelLevel { get; set; }
+    public decimal TankCapacity { get; set; }
+
+    public Car(decimal fuelLevel, decimal tankCapacity)
+    {
+        FuelLevel = fuelLevel;
+        TankCapacity = tankCapacity;
+    }
+
+    public override void Drive()
+    {
+        Console.WriteLine("Car is driving");
+    }
+
+    public override void Refuel(decimal amount)
+    {
+        FuelLevel = Math.Min(FuelLevel + amount, TankCapacity);
+        Console.WriteLine("Car is refueled");
+    }
+}
+
+class Motorcycle : Vehicle
+{
+    public decimal FuelLevel { get; set; }
+    public decimal TankCapacity { get; set; }
+
+    public Motorcycle(decimal fuelLevel, decimal tankCapacity)
+    {
+        FuelLevel = fuelLevel;
+        TankCapacity = tankCapacity;
+    }
+
+    public override void Drive()
+    {
+        Console.WriteLine("Motorcycle is driving");
+    }
+
+    public override void Refuel(decimal amount)
+    {
+        FuelLevel = Math.Min(FuelLevel + amount, TankCapacity);
+        Console.WriteLine("Motorcycle is refueled");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Vehicle car = new Car(10, 50);
+        car.Drive(); // Output: Car is driving
+        car.Refuel(20); // Output: Car is refueled
+
+        Vehicle motorcycle = new Motorcycle(5, 15);
+        motorcycle.Drive(); // Output: Motorcycle is driving
+        motorcycle.Refuel(10); // Output: Motorcycle is refueled
+    }
+}
+
+5. Implement a Class Hierarchy with Method Overriding and Interfaces
+   - Task: Create an interface `IIdentifiable` with a method `GetId()`. Create an abstract class `Document` that implements `IIdentifiable` and has a method `Print()`. Derive classes `Invoice` and `Receipt` from `Document`.
+   - Requirements:
+     - `Invoice` should have properties `InvoiceNumber` and `Amount`. Implement the `GetId()` method to return the invoice number and `Print()` to print invoice details.
+     - `Receipt` should have properties `ReceiptNumber` and `TotalAmount`. Implement the `GetId()` method to return the receipt number and `Print()` to print receipt details.
+   - Example:
+     ```csharp
+     Document invoice = new Invoice("INV001", 1000);
+     Console.WriteLine(invoice.GetId()); // Output: INV001
+     invoice.Print(); // Output: Invoice details
+
+     Document receipt = new Receipt("REC001", 200);
+     Console.WriteLine(receipt.GetId()); // Output: REC001
+     receipt.Print(); // Output: Receipt details
+
+     5. Class Hierarchy with Method Overriding and Interfaces
+
+
+using System;
+
+interface IIdentifiable
+{
+    string GetId();
+}
+
+abstract class Document : IIdentifiable
+{
+    public abstract string GetId();
+    public abstract void Print();
+}
+
+class Invoice : Document
+{
+    public string InvoiceNumber { get; set; }
+    public decimal Amount { get; set; }
+
+    public Invoice(string invoiceNumber, decimal amount)
+    {
+        InvoiceNumber = invoiceNumber;
+        Amount = amount;
+    }
+
+    public override string GetId()
+    {
+        return InvoiceNumber;
+    }
+
+    public override void Print()
+    {
+        Console.WriteLine($"Invoice Number: {InvoiceNumber}, Amount: {Amount}");
+    }
+}
+
+class Receipt : Document
+{
+    public string ReceiptNumber { get; set; }
+    public decimal TotalAmount { get; set; }
+
+    public Receipt(string receiptNumber, decimal totalAmount)
+    {
+        ReceiptNumber = receiptNumber;
+        TotalAmount = totalAmount;
+    }
+
+    public override string GetId()
+    {
+        return ReceiptNumber;
+    }
+
+    public override void Print()
+    {
+        Console.WriteLine($"Receipt Number: {ReceiptNumber}, Total Amount: {TotalAmount}");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Document invoice = new Invoice("INV001", 1000);
+        Console.WriteLine(invoice.GetId()); // Output: INV001
+        invoice.Print(); // Output: Invoice Number: INV001, Amount: 1000
+
+        Document receipt = new Receipt("REC001", 200);
+        Console.WriteLine(receipt.GetId()); // Output: REC001
+        receipt.Print(); // Output: Receipt Number: REC001, Total Amount: 200
+    }
+}
+
