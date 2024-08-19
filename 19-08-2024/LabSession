@@ -1,0 +1,90 @@
+1. Purpose:
+Abstract Class: Used when classes share some common behavior but not all. It allows you to define some methods with implementation (concrete methods) and some without (abstract methods). It's a base class meant to be extended by other classes.
+Interface: Defines a contract that other classes must follow. It only contains method signatures (declarations) without any implementation. It's used to define a common protocol for classes that may not share a parent class.
+2. Implementation:
+Abstract Class: Can have both abstract methods (without a body) and concrete methods (with implementation).
+Interface: All methods in an interface are abstract by default (although modern languages like C# allow default methods with implementations). In general, no method implementations are provided.
+Abstract Class:
+abstract class Animal
+{
+    public abstract void MakeSound(); // Abstract method
+    public void Sleep()               // Concrete method
+    {
+        Console.WriteLine("Sleeping...");
+    }
+}
+Interface:
+interface IFlyable
+{
+    void Fly();  // No implementation, just a method signature
+}
+----------------------------------------------------------------------------------------------------------------------------------
+C# 7.3 and Earlier
+In C# 7.3 and earlier, interfaces could only declare methods, properties, events, and indexers. Methods in interfaces were abstract by default, meaning they had no implementation. Interfaces couldn’t contain static members or default implementations.
+using System;
+
+namespace OldCSharp
+{
+    public interface IShape
+    {
+        void Draw();           // Method signature only
+        int Sides { get; }     // Property signature only
+    }
+
+    public class Triangle : IShape
+    {
+        public int Sides { get; } = 3;
+
+        public void Draw()
+        {
+            Console.WriteLine("Drawing a Triangle.");
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            IShape myShape = new Triangle();
+            myShape.Draw();  // Outputs: Drawing a Triangle.
+            Console.WriteLine($"Sides: {myShape.Sides}");  // Outputs: Sides: 3
+        }
+    }
+}
+C# 8.0
+C# 8.0 introduced default implementations in interfaces, which allows you to provide method bodies in interfaces. This feature enables the addition of new methods to an interface without breaking existing implementations. However, static members were still not allowed in interfaces in this version.
+using System;
+
+namespace NewCSharp8
+{
+    public interface IShape
+    {
+        void Draw();           
+        int Sides { get; }     
+
+        // Default implementation
+        void DisplayShapeInfo()
+        {
+            Console.WriteLine($"This shape has {Sides} sides.");
+        }
+    }
+
+    public class Triangle : IShape
+    {
+        public int Sides { get; } = 3;
+
+        public void Draw()
+        {
+            Console.WriteLine("Drawing a Triangle.");
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            IShape myShape = new Triangle();
+            myShape.Draw();  
+            myShape.DisplayShapeInfo(); 
+    }
+}
