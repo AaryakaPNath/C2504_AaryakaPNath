@@ -1,0 +1,77 @@
+#Params
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Params
+{
+    internal class Program
+    {
+        public static int Add(params int[] numbers)
+        {
+            int sum = 0;
+            foreach (int number in numbers)
+            {
+                sum += number;
+            }
+
+            return sum;
+        }
+        static void Main(string[] args)
+        {
+            int result1 = Add(1, 2);
+            int result2 = Add(1, 2, 5);
+            int result3 = Add(1, 2, 5, 9);
+
+            Console.WriteLine("Sum of 1 and 2 is: " + result1);       
+            Console.WriteLine("Sum of 1, 2 and 5 is: " + result2);        
+            Console.WriteLine("Sum of 1, 2, 5 and 9 is: " + result3);
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
+#new
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NewKeyword
+{
+    public class Student1
+    {
+        public int Id { get; set; } = 1;
+        public string Name { get; set; } = "John";
+        public void display()
+        {
+            Console.WriteLine($"Hi I'm {Name} of Id {Id}");
+        }
+    }
+    public class Student2 : Student1
+    {
+        public new void  display()
+        {
+            Console.WriteLine($"Hi I'm {Name} of Id {Id}");
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Student1 s1 = new Student1();
+            s1.display();
+            Student2 s2 = new Student2
+            {
+                Id = 2,
+                Name = "Jane"
+            };
+            s2.display();
+        }
+    }
+}
