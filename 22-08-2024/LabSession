@@ -1,0 +1,39 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OutKeyword_Lab
+{
+    internal class Program
+    {
+        static bool TryDiv(int x, int y, out int res)
+        {
+            try
+            {
+                res = x / y;
+                return true;
+            }
+            catch
+            {
+                res = 0;
+                return false;
+            }
+        }
+        static void Main(string[] args)
+        {
+                int a = 10;
+                int b = 5;
+
+                if(TryDiv(a, b, out int result))
+                {
+                    Console.WriteLine(result);
+                }
+                else
+                {
+                    Console.WriteLine("Divsion failed");
+                }
+        }
+    }
+}
