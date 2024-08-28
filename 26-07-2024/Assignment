@@ -1,0 +1,111 @@
+#array
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Indexer
+{
+    public class EmployeeSalaries
+    {
+
+        private double[] salaries;
+        public EmployeeSalaries(int size)
+        {
+            salaries = new double[size];
+        }
+
+        public double this[int index]
+        {
+            get
+            {
+                return salaries[index];
+            }
+            set
+            {
+                salaries[index] = value;
+            }
+        }
+    }
+    internal class Programs
+    {
+
+
+        static void Main(string[] args)
+        {
+            Console.Write("Number of Salaries:");
+            int N = int.Parse(Console.ReadLine());
+            EmployeeSalaries employeeSalaries = new EmployeeSalaries(N);
+            Console.WriteLine($"Enter {N} salaries one by one.");
+            for (int I = 0; I < N; I++)
+            {
+                Console.Write($"Salary {I + 1}:");
+                employeeSalaries[I] = double.Parse(Console.ReadLine());
+            }
+            Console.WriteLine($"Salaries:");
+            for (int I = 0; I < N; I++)
+            {
+                Console.Write($"{employeeSalaries[I]} ");
+            }
+            Console.WriteLine();
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
+#matrix
+using System;
+
+public class EmployeeSalaries
+{
+    private double[,] salaryMatrix;
+    public EmployeeSalaries(int rows, int cols)
+    {
+        salaryMatrix = new double[rows, cols];
+    }
+
+    public double this[int rowIndex, int colIndex]
+    {
+        get
+        {
+            return salaryMatrix[rowIndex, colIndex];
+        }
+        set
+        {
+            salaryMatrix[rowIndex, colIndex] = value;
+        }
+    }
+}
+internal class Programs
+{
+
+
+    static void Main(string[] args)
+    {
+        Console.Write("Number of Rows in Salary Matrix:");
+        int rows = int.Parse(Console.ReadLine());
+        Console.Write("Number of Columns in Salary Matrix:");
+        int cols = int.Parse(Console.ReadLine());
+        EmployeeSalaries employeeSalaries = new EmployeeSalaries(rows, cols);
+        Console.WriteLine($"Enter {rows}x{cols} salary matrix row by row.");
+        for (int I = 0; I < rows; I++)
+        {
+            for (int J = 0; J < cols; J++)
+            {
+                Console.Write($"Salary at {I},{J}:");
+                employeeSalaries[I, J] = double.Parse(Console.ReadLine());
+            }
+        }
+        Console.WriteLine($"Salary Matrix:");
+        for (int I = 0; I < rows; I++)
+        {
+            for (int J = 0; J < cols; J++)
+            {
+                Console.Write($"{employeeSalaries[I, J]} ");
+            }
+            Console.WriteLine();
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
