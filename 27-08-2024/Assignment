@@ -1,3 +1,29 @@
+<<<<<<< HEAD
+Assessment4
+=======
+Problem Statement: Patient Vital Signs Tracker
+- Define a class: `VitalSigns` with the following properties:
+- `PatientID` (integer)
+- `HeartRate` (integer, beats per minute)
+- `BloodPressure` (string, systolic/diastolic)
+- `Temperature` (double, in Celsius)
+- Tasks:
+1. Data Collection:
+- Read N `vitalSigns` from the keyboard.
+2. Find Patient with Lowest Heart Rate:
+- Display the patient with the lowest heart rate.
+Solve in time complexity of O(N).
+Dont use built-in C# sorting or LINQ.
+3. Find Second Highest Temperature:
+- Display the patient with the second highest temperature.
+Solve in time complexity of O(N).
+Dont use built-in C# sorting or LINQ.
+4. Sort by Blood Pressure (systolic):
+- Implement and call your own sorting algorithm based on the systolic value of blood pressure.
+Dont use built-in C# sorting or LINQ.
+>>>>>>> 7d616a829a29b4b2b583b7823ebd42b47eae4a63
+
+<<<<<<< HEAD
 Problem Statement: Patient Vital Signs Tracker
 - Define a class: `VitalSigns` with the following properties:
 - `PatientID` (integer)
@@ -19,6 +45,7 @@ Dont use built-in C# sorting or LINQ.
 - Implement and call your own sorting algorithm based on the systolic value of blood pressure.
 Dont use built-in C# sorting or LINQ.
 
+=======
 
 CREATE DATABASE Week4AssessmentDb;
 
@@ -287,92 +314,67 @@ namespace Week4AssessmentApp.Tests
     public class VitalSignsServiceTests
     {
         [TestMethod]
-        public void Read_ValidData_ShouldPopulateVitalSignsArray()
+        public void FindPatientWithLowestHeartRate_Test()
         {
             // Arrange
-            var vitalSignsArray = new VitalSigns[3];
-
-            // Act
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
             VitalSignsService.Read(vitalSignsArray);
-
-            // Assert
-            Assert.IsNotNull(vitalSignsArray);
-            Assert.AreEqual(3, vitalSignsArray.Length);
-            foreach (var vitalSigns in vitalSignsArray)
+            VitalSigns expected = new VitalSigns
             {
-                Assert.IsNotNull(vitalSigns);
-            }
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ServerException))]
-        public void Read_NotEnoughData_ShouldThrowServerException()
-        {
-            // Arrange
-            var vitalSignsArray = new VitalSigns[5]; // Assuming database has only 3 records
-
-            // Act
-            VitalSignsService.Read(vitalSignsArray);
-
-            // Assert: Expected exception
-        }
-
-        [TestMethod]
-        public void FindPatientWithLowestHeartRate_ShouldReturnCorrectPatient()
-        {
-            // Arrange
-            var vitalSignsArray = new VitalSigns[]
-            {
-                new VitalSigns { PatientID = 1, HeartRate = 80 },
-                new VitalSigns { PatientID = 2, HeartRate = 60 },
-                new VitalSigns { PatientID = 3, HeartRate = 75 }
+                PatientID = 103,
+                HeartRate = 65,
+                BloodPressure = "110/70",
+                Temperature = 97.8
             };
 
             // Act
-            var result = VitalSignsService.FindPatientWithLowestHeartRate(vitalSignsArray);
+            VitalSigns actual = VitalSignsService.FindPatientWithLowestHeartRate(vitalSignsArray);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.PatientID);
+            Assert.AreEqual(expected.ToString(), actual.ToString());
         }
 
         [TestMethod]
-        public void FindPatientWithSecondHighestTemperature_ShouldReturnCorrectPatient()
+        public void FindPatientWithSecondHighestTemperature_Test()
         {
             // Arrange
-            var vitalSignsArray = new VitalSigns[]
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
+            VitalSignsService.Read(vitalSignsArray);
+            VitalSigns expected = new VitalSigns
             {
-                new VitalSigns { PatientID = 1, Temperature = 98.6 },
-                new VitalSigns { PatientID = 2, Temperature = 100.1 },
-                new VitalSigns { PatientID = 3, Temperature = 99.5 }
+                PatientID = 101,
+                HeartRate = 72,
+                BloodPressure = "120/80",
+                Temperature = 98.6
             };
 
             // Act
-            var result = VitalSignsService.FindPatientWithSecondHighestTemperature(vitalSignsArray);
+            VitalSigns actual = VitalSignsService.FindPatientWithSecondHighestTemperature(vitalSignsArray);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(3, result.PatientID);
+            Assert.AreEqual(expected.ToString(), actual.ToString());
         }
 
         [TestMethod]
-        public void SelectionSortBySystolicBloodPressure_ShouldSortCorrectly()
+        public void SelectionSortBySystolicBloodPressure_Test()
         {
             // Arrange
-            var vitalSignsArray = new VitalSigns[]
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
+            VitalSignsService.Read(vitalSignsArray);
+            VitalSigns expected = new VitalSigns
             {
-                new VitalSigns { PatientID = 1, BloodPressure = "120/80" },
-                new VitalSigns { PatientID = 2, BloodPressure = "110/70" },
-                new VitalSigns { PatientID = 3, BloodPressure = "130/90" }
+                PatientID = 103,
+                HeartRate = 65,
+                BloodPressure = "110/70",
+                Temperature = 97.8
             };
 
             // Act
             VitalSignsService.SelectionSortBySystolicBloodPressure(vitalSignsArray);
+            VitalSigns actual = vitalSignsArray[0];
 
             // Assert
-            Assert.AreEqual(2, vitalSignsArray[0].PatientID); // 110/70
-            Assert.AreEqual(1, vitalSignsArray[1].PatientID); // 120/80
-            Assert.AreEqual(3, vitalSignsArray[2].PatientID); // 130/90
+            Assert.AreEqual(expected.ToString(), actual.ToString());
         }
     }
 }
