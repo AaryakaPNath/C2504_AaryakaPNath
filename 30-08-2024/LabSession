@@ -1,5 +1,34 @@
 Indexer
 
+public class Website
+{
+    public string Name { get; set; }
+    public string Address { get; set; }
+}
+
+public class Websites
+{
+    private Website[] data = new Website[10];
+
+    public Website this[int index]
+    {
+        get { return data[index]; }
+        set { data[index] = value; }
+    }
+}
+
+internal class Program
+{
+    public static void Main()
+    {
+        var websites = new Websites();
+        websites[0] = new Website() { Name = "Web 1", Address = "http://www.mobi.com" };
+
+        Console.WriteLine($"Website Name: {websites[0].Name}");
+        Console.WriteLine($"Website Address: {websites[0].Address}");
+    }
+}
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
