@@ -1,0 +1,130 @@
+Indexer
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Policy;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Indexer
+{
+    class Website
+    {
+        public string Name { get; set; }
+        public string Address { get; set; }
+    }
+
+    class Websites
+    {
+        private Website[] _data = new Website[10];
+
+        public Website this[int index]
+        {
+            get => _data[index];
+            set
+            {
+                if (index >= 0 && index < _data.Length)
+                    _data[index] = value;
+            }
+        }
+
+        // Method to count Indian websites
+        public int GetIndianWebsiteCount()
+        {
+            int count = 0;
+            foreach (var site in _data)
+            {
+                if (site != null && site.Address.EndsWith(".in"))
+                    count++;
+            }
+            return count;
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var websites = new Websites();
+            websites[0] = new Website() { Name = "web 0", Address = "https://www.web0.com" };
+            websites[1] = new Website() { Name = "web 1", Address = "https://www.web1.com" };
+            websites[2] = new Website() { Name = "web 2", Address = "https://www.web2.com" };
+            websites[3] = new Website() { Name = "web 3", Address = "https://www.web3.us" };
+            websites[4] = new Website() { Name = "web 4", Address = "https://www.web4.us" };
+            websites[5] = new Website() { Name = "web 5", Address = "https://www.web5.in" };
+
+            Console.WriteLine($"Number of Indian websites: {websites.GetIndianWebsiteCount()}");
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------
+Delegates
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+
+namespace Delegates1
+{
+    public delegate void Operation(int n1, int n2);
+    internal class Program
+    {
+        public static void Add(int a, int b)
+        {
+            Console.WriteLine(a +b);
+        }
+        public static void Sub(int a, int b)
+        {
+            
+            Console.WriteLine(a - b);
+        }
+        public static void Mul(int a, int b,int c)
+        {
+            Console.WriteLine(a * b * c);
+        }
+        static void Main(string[] args)
+        {
+            Operation op = Add;
+            op += Sub;
+            op += Sub;
+            op -= Sub;
+            Thread.Sleep(1000);
+            op(10, 5);
+            
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+
+namespace Delegates2
+{
+    internal class Program
+    {
+        public static void DoThis()
+        {
+            Console.WriteLine("Hello");
+        }
+        public static void SetTimer(int delay,Action Callback)
+        {
+            Thread.Sleep(delay);
+            Callback();
+        }
+        static void Main(string[] args)
+        {
+            SetTimer(5000, DoThis);
+            
+        }
+    }
+}
+-------------------------------------------------------------------------------------------------------------------------------
