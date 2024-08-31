@@ -1,0 +1,22 @@
+-- Create the database
+CREATE DATABASE Week4AssessmentDb;
+
+-- Use the newly created database
+USE Week4AssessmentDb;
+
+-- Create the VitalSigns table
+CREATE TABLE VitalSigns (
+    PatientID INT PRIMARY KEY,
+    HeartRate INT NOT NULL,
+    BloodPressure NVARCHAR(10) NOT NULL,
+    Temperature FLOAT
+);
+
+-- Insert sample data into the VitalSigns table
+INSERT INTO VitalSigns (PatientID, HeartRate, BloodPressure, Temperature) VALUES
+(101, 72, '120/80', 98.6),
+(102, 85, '130/85', 99.2),
+(103, 65, '110/70', 97.8);
+
+-- Select all records from the VitalSigns table
+SELECT * FROM VitalSigns;
