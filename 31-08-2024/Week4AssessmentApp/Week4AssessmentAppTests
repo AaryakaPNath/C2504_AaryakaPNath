@@ -1,0 +1,78 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Week4AssessmentApp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Week4AssessmentApp.Tests
+{
+    [TestClass]
+    public class VitalSignsServiceTests
+    {
+        [TestMethod]
+        public void FindPatientWithLowestHeartRate_Test()
+        {
+            // Arrange
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
+            VitalSignsService.Read(vitalSignsArray);
+            VitalSigns expected = new VitalSigns
+            {
+                PatientID = 103,
+                HeartRate = 65,
+                BloodPressure = "110/70",
+                Temperature = 97.8
+            };
+
+            // Act
+            VitalSigns actual = VitalSignsService.FindPatientWithLowestHeartRate(vitalSignsArray);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
+        [TestMethod]
+        public void FindPatientWithSecondHighestTemperature_Test()
+        {
+            // Arrange
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
+            VitalSignsService.Read(vitalSignsArray);
+            VitalSigns expected = new VitalSigns
+            {
+                PatientID = 101,
+                HeartRate = 72,
+                BloodPressure = "120/80",
+                Temperature = 98.6
+            };
+
+            // Act
+            VitalSigns actual = VitalSignsService.FindPatientWithSecondHighestTemperature(vitalSignsArray);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
+        [TestMethod]
+        public void SelectionSortBySystolicBloodPressure_Test()
+        {
+            // Arrange
+            VitalSigns[] vitalSignsArray = new VitalSigns[3];
+            VitalSignsService.Read(vitalSignsArray);
+            VitalSigns expected = new VitalSigns
+            {
+                PatientID = 103,
+                HeartRate = 65,
+                BloodPressure = "110/70",
+                Temperature = 97.8
+            };
+
+            // Act
+            VitalSignsService.SelectionSortBySystolicBloodPressure(vitalSignsArray);
+            VitalSigns actual = vitalSignsArray[0];
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+    }
+}
