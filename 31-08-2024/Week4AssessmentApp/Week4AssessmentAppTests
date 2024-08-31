@@ -40,10 +40,10 @@ namespace Week4AssessmentApp.Tests
             VitalSignsService.Read(vitalSignsArray);
             VitalSigns expected = new VitalSigns
             {
-                PatientID = 101,
-                HeartRate = 72,
-                BloodPressure = "120/80",
-                Temperature = 98.6
+                PatientID = 103,
+                HeartRate = 65,
+                BloodPressure = "110/70",
+                Temperature = 97.8
             };
 
             // Act

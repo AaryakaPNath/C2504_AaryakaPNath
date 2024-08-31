@@ -1,0 +1,420 @@
+CREATE DATABASE Week4AssessmentDb1;
+
+USE Week4Assessment Db1;
+
+CREATE TABLE VitalSigns1 (
+    PatientID INT PRIMARY KEY,
+    HeartRate INT NOT NULL,
+    BloodPressure NVARCHAR(10) NOT NULL,
+    Temperature FLOAT
+);
+
+INSERT INTO VitalSigns (PatientID, HeartRate, BloodPressure, Temperature) VALUES
+(101, 72, '120/80', 98.6),
+(102, 85, '130/85', 99.2),
+(103, 65, '110/70', 97.8);
+
+SELECT * FROM VitalSigns;
+------------------------------------------------------------------------------------------------------------------------------------
+Progarm.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Week4AssessmentTask2
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            
+            
+                VitalSignsMenu.Menu();
+                Console.ReadKey();
+           
+
+        }
+    }
+}
+-------------------------------------------------------------------------------------------------------------------------------
+VitalSigns.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Week4AssessmentTask2
+{
+    internal class VitalSigns
+    {
+        public int PatientID;
+        public int HeartRate;
+        public string BloodPressure;
+        public double Temperature;
+
+        public VitalSigns(int patientID, int heartRate, string bloodPressure, double temperature)
+        {
+            PatientID = patientID;
+            HeartRate = heartRate;
+            BloodPressure = bloodPressure;
+            Temperature = temperature;
+        }
+
+        public override string ToString()
+        {
+            return $"[PatientID={PatientID}, HeartRate={HeartRate}, BloodPressure={BloodPressure}, Temperature={Temperature}]";
+        }
+
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
+VitalSignsDAO.cs
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.Remoting.Contexts;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace Week4AssessmentTask2
+{
+    internal class VitalSignsDAO
+    {
+        private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog = Week4AssessmentDb1; Integrated Security = True;";
+
+        // Create a VitalSigns record
+        public void Create(VitalSigns vitalSigns)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "INSERT INTO VitalSigns1 (PatientID, HeartRate, BloodPressure, Temperature) VALUES (@PatientID, @HeartRate, @BloodPressure, @Temperature)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", vitalSigns.PatientID);
+                cmd.Parameters.AddWithValue("@HeartRate", vitalSigns.HeartRate);
+                cmd.Parameters.AddWithValue("@BloodPressure", vitalSigns.BloodPressure);
+                cmd.Parameters.AddWithValue("@Temperature", vitalSigns.Temperature);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                Console.WriteLine("Vital Signs record created successfully.");
+            }
+        }
+
+        // Read a VitalSigns record by PatientID
+        public VitalSigns Read(int patientID)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT PatientID, HeartRate, BloodPressure, Temperature FROM VitalSigns1 WHERE PatientID = @PatientID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", patientID);
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    VitalSigns vs = new VitalSigns(
+                        (int)reader["PatientID"],
+                        (int)reader["HeartRate"],
+                        reader["BloodPressure"].ToString(),
+                        (double)reader["Temperature"]
+                    );
+                    return vs;
+                }
+                else
+                {
+                    Console.WriteLine("Vital Signs record not found.");
+                    return null;
+                }
+            }
+        }
+
+        // Update a VitalSigns record
+        public void Update(VitalSigns updatedVitalSigns)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE VitalSigns1 SET HeartRate = @HeartRate, BloodPressure = @BloodPressure, Temperature = @Temperature WHERE PatientID = @PatientID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", updatedVitalSigns.PatientID);
+                cmd.Parameters.AddWithValue("@HeartRate", updatedVitalSigns.HeartRate);
+                cmd.Parameters.AddWithValue("@BloodPressure", updatedVitalSigns.BloodPressure);
+                cmd.Parameters.AddWithValue("@Temperature", updatedVitalSigns.Temperature);
+
+                conn.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                if (rowsAffected > 0)
+                {
+                    Console.WriteLine("Vital Signs record updated successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Vital Signs record not found.");
+                }
+            }
+        }
+
+        // Delete a VitalSigns record by PatientID
+        public void Delete(int patientID)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "DELETE FROM VitalSigns1 WHERE PatientID = @PatientID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@PatientID", patientID);
+
+                conn.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                if (rowsAffected > 0)
+                {
+                    Console.WriteLine("Vital Signs record deleted successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Vital Signs record not found.");
+                }
+            }
+        }
+
+        // List all VitalSigns records
+        public void ListAll()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT PatientID, HeartRate, BloodPressure, Temperature FROM VitalSigns1";
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                Console.WriteLine("All Vital Signs Records:");
+                while (reader.Read())
+                {
+                    VitalSigns vs = new VitalSigns(
+                        (int)reader["PatientID"],
+                        (int)reader["HeartRate"],
+                        reader["BloodPressure"].ToString(),
+                        (double)reader["Temperature"]
+                    );
+                    Console.WriteLine(vs.ToString());
+                }
+            }
+        }
+
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------
+VitalSignsMenu.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Week4AssessmentTask2
+{
+    internal class VitalSignsMenu
+    {
+        private static VitalSignsDAO dao = new VitalSignsDAO();
+
+        public static void Menu()
+        {
+            bool running = true;
+
+            while (running)
+            {
+                Console.WriteLine("\nVital Signs Management System");
+                Console.WriteLine("1. Create Vital Signs");
+                Console.WriteLine("2. Read Vital Signs");
+                Console.WriteLine("3. Update Vital Signs");
+                Console.WriteLine("4. Delete Vital Signs");
+                Console.WriteLine("5. List All Vital Signs");
+                Console.WriteLine("6. Exit");
+
+                Console.Write("Choose an option: ");
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        CreateVitalSigns();
+                        break;
+                    case "2":
+                        ReadVitalSigns();
+                        break;
+                    case "3":
+                        UpdateVitalSigns();
+                        break;
+                    case "4":
+                        DeleteVitalSigns();
+                        break;
+                    case "5":
+                        ListAllVitalSigns();
+                        break;
+                    case "6":
+                        running = false;
+                        Console.WriteLine("Exiting...");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+        }
+
+        private static void CreateVitalSigns()
+        {
+            Console.Write("Enter Patient ID: ");
+            int patientID = int.Parse(Console.ReadLine());
+            Console.Write("Enter Heart Rate: ");
+            int heartRate = int.Parse(Console.ReadLine());
+            Console.Write("Enter Blood Pressure: ");
+            string bloodPressure = Console.ReadLine();
+            Console.Write("Enter Temperature: ");
+            double temperature = double.Parse(Console.ReadLine());
+
+            VitalSigns vitalSigns = new VitalSigns(patientID, heartRate, bloodPressure, temperature);
+            dao.Create(vitalSigns);
+        }
+
+        private static void ReadVitalSigns()
+        {
+            Console.Write("Enter Patient ID to read: ");
+            int patientID = int.Parse(Console.ReadLine());
+            VitalSigns vitalSigns = dao.Read(patientID);
+
+            if (vitalSigns != null)
+            {
+                Console.WriteLine(vitalSigns.ToString());
+            }
+        }
+
+        private static void UpdateVitalSigns()
+        {
+            Console.Write("Enter Patient ID to update: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            VitalSigns existingVitalSigns = dao.Read(patientID);
+            if (existingVitalSigns != null)
+            {
+                Console.Write("Enter new Heart Rate: ");
+                existingVitalSigns.HeartRate = int.Parse(Console.ReadLine());
+                Console.Write("Enter new Blood Pressure: ");
+                existingVitalSigns.BloodPressure = Console.ReadLine();
+                Console.Write("Enter new Temperature: ");
+                existingVitalSigns.Temperature = double.Parse(Console.ReadLine());
+
+                dao.Update(existingVitalSigns);
+            }
+            else
+            {
+                Console.WriteLine("Vital Signs record not found.");
+            }
+        }
+
+        private static void DeleteVitalSigns()
+        {
+            Console.Write("Enter Patient ID to delete: ");
+            int patientID = int.Parse(Console.ReadLine());
+            dao.Delete(patientID);
+        }
+
+        private static void ListAllVitalSigns()
+        {
+            Console.WriteLine("All Vital Signs Records:");
+            dao.ListAll();
+        }
+    }
+
+
+
+}
+---------------------------------------------------------------------------------------------------------------------------------
+VitalSignsUI.cs
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Week4AssessmentTask2
+{
+    internal class VitalSignsUI
+    {
+        private VitalSignsDAO vitalSignsDAO = new VitalSignsDAO();
+
+        public void CreateVitalSigns()
+        {
+            Console.Write("Enter Patient ID: ");
+            int patientID = int.Parse(Console.ReadLine());
+            Console.Write("Enter Heart Rate: ");
+            int heartRate = int.Parse(Console.ReadLine());
+            Console.Write("Enter Blood Pressure: ");
+            string bloodPressure = Console.ReadLine();
+            Console.Write("Enter Temperature: ");
+            double temperature = double.Parse(Console.ReadLine());
+
+            VitalSigns vitalSigns = new VitalSigns(patientID, heartRate, bloodPressure, temperature);
+
+            vitalSignsDAO.Create(vitalSigns);
+        }
+
+        public void ReadVitalSigns()
+        {
+            Console.Write("Enter Patient ID: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            VitalSigns vitalSigns = vitalSignsDAO.Read(patientID);
+            if (vitalSigns != null)
+            {
+                Console.WriteLine($"Patient ID: {vitalSigns.PatientID}");
+                Console.WriteLine($"Heart Rate: {vitalSigns.HeartRate}");
+                Console.WriteLine($"Blood Pressure: {vitalSigns.BloodPressure}");
+                Console.WriteLine($"Temperature: {vitalSigns.Temperature}");
+            }
+        }
+
+        public void UpdateVitalSigns()
+        {
+            Console.Write("Enter Patient ID: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            VitalSigns vitalSigns = vitalSignsDAO.Read(patientID);
+            if (vitalSigns != null)
+            {
+                Console.Write("Enter new Heart Rate: ");
+                vitalSigns.HeartRate = int.Parse(Console.ReadLine());
+                Console.Write("Enter new Blood Pressure: ");
+                vitalSigns.BloodPressure = Console.ReadLine();
+                Console.Write("Enter new Temperature: ");
+                vitalSigns.Temperature = double.Parse(Console.ReadLine());
+
+                vitalSignsDAO.Update(vitalSigns);
+            }
+        }
+
+        public void DeleteVitalSigns()
+        {
+            Console.Write("Enter Patient ID: ");
+            int patientID = int.Parse(Console.ReadLine());
+
+            vitalSignsDAO.Delete(patientID);
+        }
+
+        public void ListAllVitalSigns()
+        {
+            vitalSignsDAO.ListAll();
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
