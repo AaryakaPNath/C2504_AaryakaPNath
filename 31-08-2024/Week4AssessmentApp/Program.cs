@@ -1,3 +1,25 @@
+// Problem Statement: Patient Vital Signs Tracker
+// - Define a class: `VitalSigns` with the following properties:
+// - `PatientID` (integer)
+// - `HeartRate` (integer, beats per minute)
+// - `BloodPressure` (string, systolic/diastolic)
+// - `Temperature` (double, in Celsius)
+// - Tasks:
+// 1. Data Collection:
+// - Read N `vitalSigns` from the keyboard.
+// 2. Find Patient with Lowest Heart Rate:
+// - Display the patient with the lowest heart rate.
+// Solve in time complexity of O(N).
+// Dont use built-in C# sorting or LINQ.
+// 3. Find Second Highest Temperature:
+// - Display the patient with the second highest temperature.
+// Solve in time complexity of O(N).
+// Dont use built-in C# sorting or LINQ.
+// 4. Sort by Blood Pressure (systolic):
+// - Implement and call your own sorting algorithm based on the systolic value of blood pressure.
+// Dont use built-in C# sorting or LINQ.
+
+
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
