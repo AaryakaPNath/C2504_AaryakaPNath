@@ -1,0 +1,443 @@
+TCP
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TCPSocketProgramming
+{
+    public class SimpleServer
+    {
+        public void service(string ipAddr = "127.0.0.1", int port = 13000)
+        {
+            TcpListener server = new TcpListener(IPAddress.Parse(ipAddr), port);// Create a TCP listener
+
+
+            server.Start();// Start listening for client requests
+            Console.WriteLine($"Server is listening on port {port}...");
+
+            byte[] bytes = new byte[1024];// Buffer for reading data
+            string personName = null;//request param
+
+
+            TcpClient client = server.AcceptTcpClient();// Enter the listening loop
+            Console.WriteLine("Connected!");
+
+            NetworkStream stream = client.GetStream();
+
+
+            // Loop to receive all the data sent by the client
+            //while (true)
+            //{
+            int i = stream.Read(bytes, 0, bytes.Length);
+            personName = Encoding.ASCII.GetString(bytes, 0, i).Trim();
+            Console.WriteLine($"person name: {personName}");//INFO
+                                                            //if (data.ToLower() == "end"){ break;}
+                                                            //}
+
+
+
+            // Send back a response
+            string greetName = $"Hello {personName}";
+            byte[] msg = Encoding.ASCII.GetBytes(greetName);
+            stream.Write(msg, 0, msg.Length);
+
+            Console.WriteLine($"greetings:{greetName}, sent.");//DEBUG
+
+            client.Close();// Shutdown and end connection
+
+
+            server.Stop();// Stop server 
+        }
+    }
+    public class SimpleClient
+    {
+        public void service(string serverAddress = "127.0.0.1", int port = 13000)
+        {
+
+
+            TcpClient client = new TcpClient(serverAddress, port);
+            NetworkStream stream = client.GetStream();
+
+            //while (true)
+            //{
+            Console.Write("Person Name:");
+            string personName = Console.ReadLine();
+
+            byte[] data = Encoding.ASCII.GetBytes(personName);
+            stream.Write(data, 0, data.Length);
+            //}
+
+            // Buffer to store the response bytes
+            byte[] responseBytes = new byte[1024];
+
+            // Read the server's response
+            int bytes = stream.Read(responseBytes, 0, responseBytes.Length);
+            string greetName = Encoding.ASCII.GetString(responseBytes, 0, bytes);
+            Console.WriteLine($"greetings: {greetName}");
+
+            stream.Close();
+            client.Close();
+
+        }
+    }
+
+    internal class Programs
+    {
+
+        static void Main()
+        {
+            Console.Write("Option[1-Run Server, 2-Run Client]:");
+            int option = int.Parse(Console.ReadLine());
+            int port = 13000;//change it 
+            string serverAddress = "127.0.0.1";
+            switch (option)
+            {
+                case 1:
+                    Console.WriteLine("Server Service to get started...");
+                    SimpleServer server = new SimpleServer();
+                    server.service(port: port);
+                    break;
+                case 2:
+                    Console.WriteLine("Client Service to get started...");
+                    SimpleClient client = new SimpleClient();
+                    client.service(serverAddress: serverAddress, port: port);
+                    break;
+            }
+            Console.WriteLine("\nPress Enter to exit...");
+            Console.Read();
+        }
+
+
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TCPSumCalculator
+{
+    public class SimpleServer
+    {
+        public void service(string ipAddr = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead = new byte[1024];
+            int bufferReadSize = 0;
+            //1
+            TcpListener server = new TcpListener(IPAddress.Parse(ipAddr), port);
+            //2
+            server.Start();
+            //3
+            Console.WriteLine($"[DEBUG]3.Server is listening on port {port}...");//DEBUG
+            TcpClient client = server.AcceptTcpClient();
+            Console.WriteLine("Connected!");//DEBUG
+                                            //4
+            NetworkStream stream = client.GetStream();
+            //Read firstNum from network
+            bufferReadSize = stream.Read(bufferRead, 0, bufferRead.Length);
+            double firstNum = Double.Parse(Encoding.ASCII.GetString(bufferRead, 0, bufferReadSize));
+            Console.WriteLine($"first number: {firstNum}");
+            //Read secondNum from network
+            bufferReadSize = stream.Read(bufferRead, 0, bufferRead.Length);
+            double secondNum = Double.Parse(Encoding.ASCII.GetString(bufferRead, 0, bufferReadSize));
+            Console.WriteLine($"second number: {secondNum}");
+            //Write sum into network
+            double sum = firstNum + secondNum;
+            Console.WriteLine($"sum: {sum}");
+            bufferWrite = Encoding.ASCII.GetBytes(sum.ToString());
+            stream.Write(bufferWrite, 0, bufferWrite.Length);
+            //5
+            client.Close();
+            //6
+            server.Stop();
+        }
+    }
+    public class SimpleClient
+    {
+        public void service(string serverAddress = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead = new byte[1024];
+            int bufferReadSize = 0;
+            //1
+            TcpClient client = new TcpClient(serverAddress, port);
+            //2
+            NetworkStream stream = client.GetStream();
+            //Write firstNum into network 
+            Console.Write("First Number:");
+            double firstNum = double.Parse(Console.ReadLine());
+            bufferWrite = Encoding.ASCII.GetBytes(firstNum.ToString());
+            stream.Write(bufferWrite, 0, bufferWrite.Length);
+            //Write secondNum into network 
+            Console.Write("Second Number:");
+            double secondNum = double.Parse(Console.ReadLine());
+            bufferWrite = Encoding.ASCII.GetBytes(secondNum.ToString());
+            stream.Write(bufferWrite, 0, bufferWrite.Length);
+            //Read sum from network 
+            bufferReadSize = stream.Read(bufferRead, 0, bufferRead.Length);
+            double sum = Double.Parse(Encoding.ASCII.GetString(bufferRead, 0, bufferReadSize));
+            Console.WriteLine($"sum: {sum}");
+            //3
+            stream.Close();
+            client.Close();
+        }
+    }
+
+    internal class Programs
+    {
+
+        static void Main()
+        {
+            Console.Write("Option[1-Run Server, 2-Run Client]:");
+            int option = int.Parse(Console.ReadLine());
+            int port = 13000;//change it 
+            string serverAddress = "127.0.0.1";
+            switch (option)
+            {
+                case 1:
+                    Console.WriteLine("Server Service to get started...");
+                    SimpleServer server = new SimpleServer();
+                    server.service(port: port);
+                    break;
+                case 2:
+                    Console.WriteLine("Client Service to get started...");
+                    SimpleClient client = new SimpleClient();
+                    client.service(serverAddress: serverAddress, port: port);
+                    break;
+            }
+            Console.WriteLine("\nPress Enter to exit...");
+            Console.Read();
+        }
+
+
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------
+UDP
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UDP_SumCalculator
+{
+    //1. calc sum at server of two numbers from client
+    public class SimpleServer
+    {
+        public void service(string ipAddr = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead;
+            //1
+            UdpClient server = new UdpClient(port);
+            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, port);
+            //2
+            //Read firstNum from client
+            bufferRead = server.Receive(ref clientEndPoint);
+            double firstNum = double.Parse(Encoding.ASCII.GetString(bufferRead));
+            Console.WriteLine($"firstNum: {firstNum}");
+            //Read secondNum from client
+            bufferRead = server.Receive(ref clientEndPoint);
+            double secondNum = double.Parse(Encoding.ASCII.GetString(bufferRead));
+            Console.WriteLine($"secondNum: {secondNum}");
+            //Write sum into client
+            double sum = firstNum + secondNum;
+            Console.WriteLine($"sum: {sum}");
+            bufferWrite = Encoding.ASCII.GetBytes(sum.ToString());
+            server.Send(bufferWrite, bufferWrite.Length, clientEndPoint);
+
+            //3
+            server.Close();
+
+        }
+    }
+    public class SimpleClient
+    {
+        public void service(string serverAddress = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead;
+            //1
+            UdpClient client = new UdpClient();
+
+            //2
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, port);
+            client.Connect(serverAddress, port); //connection less networking
+
+
+            //Write firstNum into server
+            Console.Write("First Number:"); double firstNum = double.Parse(Console.ReadLine());
+            bufferWrite = Encoding.ASCII.GetBytes(firstNum.ToString());
+            client.Send(bufferWrite, bufferWrite.Length);
+            //Write secondNum into server
+            Console.Write("Second Number:"); double secondNum = double.Parse(Console.ReadLine());
+            bufferWrite = Encoding.ASCII.GetBytes(secondNum.ToString());
+            client.Send(bufferWrite, bufferWrite.Length);
+            //Read sum from server
+            bufferRead = client.Receive(ref remoteEndPoint);
+            double sum = double.Parse(Encoding.ASCII.GetString(bufferRead));
+            Console.WriteLine($"sum: {sum}");
+
+            //4 cleaning up
+            client.Close();
+
+        }
+    }
+
+    internal class Programs
+    {
+
+        static void Main()
+        {
+            Console.Write("Option[1-Run Server, 2-Run Client]:");
+            int option = int.Parse(Console.ReadLine());
+            int port = 13000;//change it 
+            string serverAddress = "127.0.0.1";
+            switch (option)
+            {
+                case 1:
+                    Console.WriteLine("Server Service to get started...");
+                    SimpleServer server = new SimpleServer();
+                    server.service(port: port);
+                    break;
+                case 2:
+                    Console.WriteLine("Client Service to get started...");
+                    SimpleClient client = new SimpleClient();
+                    client.service(serverAddress: serverAddress, port: port);
+                    break;
+            }
+            Console.WriteLine("\nPress Enter to exit...");
+            Console.Read();
+        }
+
+
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UDP_ChatApp
+{
+    //1. text chat between client[girish] and server[yahkoop], once the msg "end" -> stop the chat 
+    //  client initiates the chat 
+    public class SimpleServer
+    {
+        public void service(string ipAddr = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead;
+            //1
+            UdpClient server = new UdpClient(port);
+            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, port);
+            //2
+            string text = "end";
+            do
+            {
+                //Read from yahkoop
+                bufferRead = server.Receive(ref clientEndPoint);
+                text = Encoding.ASCII.GetString(bufferRead);
+                Console.WriteLine($"girish: {text}");
+                if (text.Equals("end"))
+                {
+                    break;
+                }
+                //Write into yahkoop
+                Console.Write("yahkoop:");
+                text = Console.ReadLine();
+                bufferWrite = Encoding.ASCII.GetBytes(text);
+                server.Send(bufferWrite, bufferWrite.Length, clientEndPoint);
+            } while (!text.Equals("end"));
+
+
+
+
+            //3
+            server.Close();
+
+        }
+    }
+    public class SimpleClient
+    {
+        public void service(string serverAddress = "127.0.0.1", int port = 13000)
+        {
+            byte[] bufferWrite;
+            byte[] bufferRead;
+            //1
+            UdpClient client = new UdpClient();
+
+            //2
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, port);
+            client.Connect(serverAddress, port); //connection less networking
+
+
+            string text = "end";
+            do
+            {
+                //Write into girish
+                Console.Write("girish:");
+                text = Console.ReadLine();
+                bufferWrite = Encoding.ASCII.GetBytes(text);
+                client.Send(bufferWrite, bufferWrite.Length);
+                if (text.Equals("end"))
+                {
+                    break;
+                }
+                //Read from girish
+                bufferRead = client.Receive(ref remoteEndPoint);
+                text = Encoding.ASCII.GetString(bufferRead);
+                Console.WriteLine($"yahkoop: {text}");
+            } while (!text.Equals("end"));
+
+            //4 cleaning up
+            client.Close();
+
+        }
+    }
+
+    internal class Programs
+    {
+
+        static void Main()
+        {
+            Console.Write("Option[1-Run Server, 2-Run Client]:");
+            int option = int.Parse(Console.ReadLine());
+            int port = 13000;//change it 
+            string serverAddress = "127.0.0.1";
+            switch (option)
+            {
+                case 1:
+                    Console.WriteLine("Server Service to get started...");
+                    SimpleServer server = new SimpleServer();
+                    server.service(port: port);
+                    break;
+                case 2:
+                    Console.WriteLine("Client Service to get started...");
+                    SimpleClient client = new SimpleClient();
+                    client.service(serverAddress: serverAddress, port: port);
+                    break;
+            }
+            Console.WriteLine("\nPress Enter to exit...");
+            Console.Read();
+        }
+
+
+    }
+}
