@@ -1,0 +1,22 @@
+﻿<Window x:Class="Example14.ImageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Example14"
+        mc:Ignorable="d"
+        Title="Image Brush" Height="450" Width="800" Closing="Window_Closing">
+    <Canvas>
+        <Rectangle Height="188" Canvas.Left="290" Stroke="Black" Canvas.Top="64" Width="285" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Rectangle.Fill>
+                <ImageBrush  ImageSource="/Duck.jpg"/>
+            </Rectangle.Fill>
+        </Rectangle>
+        <Ellipse Height="115" Canvas.Left="375" Stroke="Black" Canvas.Top="102" Width="115">
+            <Ellipse.Fill>
+                <ImageBrush ImageSource="/pattern.jpg" Stretch="Fill" TileMode="FlipXY" Opacity="0.5" AlignmentX="Center" />
+
+            </Ellipse.Fill>
+        </Ellipse>
+    </Canvas>
+</Window>
