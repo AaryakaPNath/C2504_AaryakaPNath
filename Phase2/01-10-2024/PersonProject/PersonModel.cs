@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FullNameProject
+namespace PersonProject
 {
-    public class Person
+    public class PersonModel
     {
-        public string FirstName { get; set; }
+        public string FirstName {  get; set; }
         public string LastName { get; set; }
     }
 }

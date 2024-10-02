@@ -12,21 +12,26 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace FullNameProject
+namespace PersonProject
 {
     /// <summary>
-    /// Interaction logic for FullNameWindow.xaml
+    /// Interaction logic for Window2.xaml
     /// </summary>
-    public partial class FullNameWindow : Window
+    public partial class Window2 : Window
     {
-        public FullNameWindow()
+        public Window2()
         {
             InitializeComponent();
+            DataContext = PersonConfig.VueModel;
         }
-
-        private void Window_Closed(object sender, EventArgs e)
+        public void WindowClose()
         {
-            Application.Current.Shutdown();
+            this.Hide();
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
     }
 }

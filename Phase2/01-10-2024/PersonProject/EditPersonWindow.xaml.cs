@@ -12,18 +12,22 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace FullNameProject
+namespace PersonProject
 {
     /// <summary>
-    /// Interaction logic for EditFullNameWindow.xaml
+    /// Interaction logic for EditPersonWindow.xaml
     /// </summary>
-    public partial class EditFullNameWindow : Window
+    public partial class EditPersonWindow : Window
     {
-        public EditFullNameWindow()
+        public EditPersonWindow()
         {
             InitializeComponent();
+            DataContext = PersonConfig.VueModel;
         }
-
+        public void WindowClose()
+        {
+            this.Hide();
+        }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
