@@ -1,8 +1,8 @@
-﻿<Application x:Class="FullNameProject.App"
+﻿<Application x:Class="PersonProject.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:FullNameProject"
-             StartupUri="FullNameWindow.xaml">
+             xmlns:local="clr-namespace:PersonProject"
+             StartupUri="Window1.xaml">
     <Application.Resources>
          
     </Application.Resources>
