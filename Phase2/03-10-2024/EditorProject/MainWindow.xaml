@@ -1,0 +1,46 @@
+﻿<Window x:Class="EditorProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EditorProject"
+        mc:Ignorable="d"
+        Title="Editor App" Height="450" Width="800">
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <Menu>
+                <MenuItem Header="File">
+                    <MenuItem x:Name="btnOpen" Header="Open..." Click="btnOpen_Click"/>
+                    <Separator/>
+                    <MenuItem x:Name="btnSave" Header="Save..." Click="btnSave_Click"/>
+                    <Separator/>
+                    <MenuItem x:Name="btnFont" Header="Font..." Click="btnFont_Click" />
+                </MenuItem>
+                <MenuItem Header="Background Color">
+                    <MenuItem x:Name="mnuRed" Header="Red" Click="mnuRed_Click"/>
+                    <MenuItem x:Name="mnuBlue" Header="Blue" Click="mnuBlue_Click"/>
+                    <MenuItem x:Name="mnuMoreBackColor" Header="More" Click="mnuMoreBackColor_Click"/>
+                </MenuItem>
+            </Menu>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <ToolBarPanel>
+                <ToolBar>
+                    <Button x:Name="btnLeft" Content="Left" Click="btnLeft_Click"/>
+                    <Button x:Name="btnCenter" Content="Center" Click="btnCenter_Click"/>
+                    <Button x:Name="btnRight" Content="Right" Click="btnRight_Click"/>
+                </ToolBar>
+            </ToolBarPanel>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <StatusBar>
+                <TextBlock x:Name="lblStatus"/>
+            </StatusBar>
+        </StackPanel>
+        <DockPanel LastChildFill="True">
+            <TextBox x:Name="txtEditor"
+                     AcceptsReturn="True" Margin="5,5,5,5"
+                     Text="C# and WPF"/>
+        </DockPanel>
+    </DockPanel>
+</Window>
