@@ -1,0 +1,6 @@
+CREATE DATABASE AccountsDb;
+USE AccountsDb;
+CREATE TABLE Accounts(Id int PRIMARY KEY IDENTITY(1,1), AccNo INT, Name nvarchar(255), Balance decimal,AccType nvarchar(255),Email nvarchar(255),PhNo nvarchar(255),Address nvarchar(255),IsActive BIT,InterestPercentage nvarchar(255),TransactionCount INT,LastTransactionDate DATETIME);
+INSERT INTO Accounts (AccNo, Name, Balance, AccType, Email, PhNo, Address, IsActive, InterestPercentage, TransactionCount, LastTransactionDate)
+                                   VALUES (100, 'rahul', 200, 'current', 'rahul@gmail.com', '123456', 'g street', 'true', '5%', 2,GETDATE());
+SELECT * FROM Accounts;
