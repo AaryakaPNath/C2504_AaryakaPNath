@@ -1,0 +1,66 @@
+DarkTheme.xaml
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="Grid">
+        <Setter Property="Background" Value="Navy"/>
+    </Style>
+    <Style TargetType="TextBlock">
+        <Setter Property="Background" Value="Navy"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="Navy"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="MintCream"/>
+        <Setter Property="Foreground" Value="LightBlue"/>
+    </Style>
+</ResourceDictionary>
+----------------------------------------------------------------------------------------------------------------------------
+LightTheme.xaml
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="Grid">
+        <Setter Property="Background" Value="Silver"/>
+    </Style>
+    <Style TargetType="TextBlock">
+        <Setter Property="Background" Value="Gray"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="LightBlue"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="PaleGreen"/>
+        <Setter Property="Foreground" Value="LightBlue"/>
+    </Style>
+</ResourceDictionary>
+----------------------------------------------------------------------------------------------------------------------------
+MainWindow.xaml 
+
+<Window x:Class="ThemeProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ThemeProject"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Canvas Margin="20,20,20,20" Background="#FFFFFCFC">
+            <TextBlock Canvas.Left="90" TextWrapping="Wrap" Text="Theme App" Canvas.Top="24" HorizontalAlignment="Center" Height="74" VerticalAlignment="Top" Width="620" FontSize="36" FontWeight="Bold" TextAlignment="Center"/>
+            <TextBlock x:Name="lblUsername" Canvas.Left="185" TextWrapping="Wrap" Text="Username" Canvas.Top="169"/>
+            <TextBox x:Name="txtUsername" Canvas.Left="365" TextWrapping="Wrap" Text="Aaryaka" Canvas.Top="169" Width="120" RenderTransformOrigin="0.542,-0.443"/>
+            <TextBlock x:Name="lblPassword" Canvas.Left="185" TextWrapping="Wrap" Text="Password" Canvas.Top="236" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtPassword" Canvas.Left="365" TextWrapping="Wrap" Text="1234" Canvas.Top="236" Width="120" RenderTransformOrigin="0.542,-0.443" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <Button x:Name="btnLogin" Content="LOGIN" Canvas.Left="310" Canvas.Top="294"  HorizontalAlignment="Center" Height="50" VerticalAlignment="Top" Width="91" FontWeight="Bold"/>
+            <Button x:Name="btnLightTheme" Content="Light Theme" Canvas.Left="455" HorizontalAlignment="Left" VerticalAlignment="Center" Width="90" Click="btnLightTheme_Click" BorderBrush="#FF707070" Foreground="#FF031116"/>
+            <Button x:Name="btnDarkTheme" Content="Dark Theme" Canvas.Left="585" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Top="-1" Click="btnDarkTheme_Click"/>
+
+        </Canvas>
+    </Grid>
+</Window>
