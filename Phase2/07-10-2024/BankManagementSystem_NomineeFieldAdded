@@ -1,6 +1,6 @@
 BankingManagementSystem - 07-10-2024
 
----Add Nominee 
+------Add nominee
 
 AccountConfig.cs
 
@@ -38,7 +38,7 @@ namespace BankManagementProject
         }
     }
 }
-------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountException.cs
 
 using System;
@@ -66,8 +66,9 @@ namespace BankManagementProject
         }
     }
 }
-------------------------------------------------------------------------------------------------------------------------------
-AccountManagementWindow.cs
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+AccountManagementWindow.xaml
+
 
 <Window x:Class="BankManagementProject.AccountManagementWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -107,7 +108,7 @@ AccountManagementWindow.cs
 
     </Canvas>
 </Window>
--------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountManagementWindow.xaml.cs
 
 using System;
@@ -183,83 +184,200 @@ namespace BankManagementProject
         
     }
 }
---------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountMemoryRepo.cs
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 
 namespace BankManagementProject
 {
-    /// <summary>
-    /// Interaction logic for AccountManagementWindow.xaml
-    /// </summary>
-    public partial class AccountManagementWindow : Window
+    public class AccountMemoryRepo : IAccountRepo
     {
-        public AccountManagementWindow()
+        private static AccountMemoryRepo _instance;
+        public ObservableCollection<AccountModel> accounts = new ObservableCollection<AccountModel>()
         {
-            InitializeComponent();
-            DataContext = AccountConfig.VueModel;
-        }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            AccountConfig.FrmAddAccount.Show();
-            
-        }
-
-        private void btnEdit_Click(object sender, RoutedEventArgs e)
-        {
-            if (grdAccount.SelectedIndex == -1)
+            new AccountModel
             {
-                var result = MessageBox.Show(messageBoxText: "Please select Account details to edit",
-                    caption: "Alert",
-                    button: MessageBoxButton.OK,
-                    icon: MessageBoxImage.Information);
-                return;
-            }
-            AccountConfig.FrmEditAccount.Show();
+                AccNo = 1234,
+                Name = "Aaryaka",
+                Balance = 0,
+                AccType = "savings",
+                Email = "aaryaka@gmail.com.com",
+                PhNo = "789456123",
+                Address = "xxx street",
+                IsActive = true,
+                InterestPercentage = "0",
+                TransactionCount = 0,
+                LastTransactionDate = DateTime.Now,
+                Nominee = "Kumar"
 
-        }
 
-       
-
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            if (grdAccount.SelectedIndex == -1)
+            },
+            new AccountModel
             {
-                var result = MessageBox.Show(messageBoxText: "Please select Account details to Delete",
-                    caption: "Alert",
-                    button: MessageBoxButton.OK,
-                    icon: MessageBoxImage.Information);
-                return;
+                AccNo = 4567,
+                Name = "Parvana",
+                Balance = 0,
+                AccType = "current",
+                Email = "paru@gmail.com",
+                PhNo = "4561233",
+                Address = "yyy street",
+                IsActive = true,
+                InterestPercentage = "0",
+                TransactionCount = 0,
+                LastTransactionDate = DateTime.Now,
+                Nominee = "Rahul"
+
+
             }
-            AccountViewModel viewModel = new AccountViewModel();
-            viewModel.Delete();
+        };
+        public static AccountMemoryRepo Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AccountMemoryRepo();
+                }
+                return _instance;
+            }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        public void Create(AccountModel accModel)
         {
-            e.Cancel = true;
-            this.Hide();
+            try
+            {
+                accounts.Add(accModel);
+            }
+            catch (AccountException ae)
+            {
+                throw new AccountException("Error in creating account");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public void UpdateAccount(AccountModel accModel)
+        {
+            try
+            {
+                var existingAccount = accounts.FirstOrDefault(a => a.AccNo == accModel.AccNo);
+                if (existingAccount != null)
+                {
+                    existingAccount.Address = accModel.Address;
+                }
+                else
+                {
+                    throw new AccountException("Account doesn't exists");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public ObservableCollection<AccountModel> ReadAllAccount()
+        {
+            try
+            {
+                return accounts;
+            }
+            catch (AccountException ae)
+            {
+                throw new AccountException("Error reading accounts");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public void DeleteAccount(AccountModel accModel)
+        {
+
+            foreach (var ac in accounts)
+            {
+                if (ac.AccNo == accModel.AccNo)
+                {
+                    ac.Address = accModel.Address;
+                }
+            }
+        }
+
+        public void Deposit(int acNo, int Amount)
+        {
+            try
+            {
+                var account = accounts.FirstOrDefault(a => a.AccNo == acNo);
+                if (account != null)
+                {
+                    account.Balance = account.Balance + Amount;
+                    account.LastTransactionDate = DateTime.Now;
+                    account.TransactionCount = account.TransactionCount + 1;
+
+                }
+                else
+                {
+                    throw new AccountException("Account Not Found , Please input valid account number");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public void Withdraw(int acNo, int Amount)
+        {
+            try
+            {
+                var account = accounts.FirstOrDefault(a => a.AccNo == acNo);
+                if (account != null)
+                {
+                    if (account.Balance < Amount)
+                    {
+                        MessageBox.Show("Insufficient balance");
+                        //throw new AccountException("Insufficient balance");
+
+                    }
+                    else
+                    {
+                        account.Balance = account.Balance - Amount;
+                    }
+                    account.LastTransactionDate = DateTime.Now;
+                    account.TransactionCount = account.TransactionCount + 1;
+
+                }
+                else
+                {
+                    MessageBox.Show("Account Not Found , Please input valid account number");
+                    //throw new AccountException("Account Not Found , Please input valid account number");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void CalculateInterestAndUpdateBalance()
+        {
+            throw new NotImplementedException();
         }
 
         
     }
 }
-------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountModel.cs
 
 using System;
@@ -339,87 +457,218 @@ namespace BankManagementProject
         public string Nominee { get; set; }
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountViewModel.cs
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
+
 
 namespace BankManagementProject
 {
-    public class AccountModel : INotifyPropertyChanged
+    public delegate void DWidnowClose();
+    public class AccountViewModel : INotifyPropertyChanged
     {
-        private decimal _balance;
-        public int AccNo { get; set; }
-        public string Name { get; set; }
-        public decimal Balance
-        {
-            get { return _balance; }
-            set
-            {
-                _balance = value;
-                OnPropertyChanged(nameof(Balance));
-            }
-        }
-        public string AccType { get; set; }
-        public String Email { get; set; }
-        public String PhNo { get; set; }
-
-        private string _address;
-
-        public string Address
-        {
-            get { return _address; }
-            set
-            {
-                _address = value;
-                OnPropertyChanged(nameof(Address));
-            }
-        }
-
-        public bool IsActive { get; set; }
-        public string InterestPercentage { get; set; }
-
-        private int _transactionCount;
-
-        public int TransactionCount
-        {
-            get { return _transactionCount; }
-            set
-            {
-                _transactionCount = value;
-                OnPropertyChanged(nameof(TransactionCount));
-            }
-        }
-
-        private DateTime _lastTrasnsactionDate;
-
-        public DateTime LastTransactionDate
-        {
-            get { return _lastTrasnsactionDate; }
-            set
-            {
-                _lastTrasnsactionDate = value;
-                OnPropertyChanged(nameof(LastTransactionDate));
-            }
-        }
-
+        public DWidnowClose NewWindowClose;
+        public DWidnowClose EditWindowClose;
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string propertyName)
+        public void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private int _accountNumber;
+        public int AccountNumber
+        {
+            get { return _accountNumber; }
+            set
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                _accountNumber = value;
+                OnPropertyChanged(nameof(AccountNumber));
+            }
+
+        }
+
+        private int _amount;
+
+        public int Amount
+        {
+            get { return _amount; }
+            set
+            {
+                _amount = value;
+                OnPropertyChanged(nameof(Amount));
             }
         }
-        public string Nominee { get; set; }
+
+        private AccountModel _newAccount = null;
+        public AccountModel NewAccount
+        {
+            get => _newAccount;
+            set { _newAccount = value; OnPropertyChanged(nameof(NewAccount)); }
+        }
+        //
+        private AccountModel _selectedAccount = null;
+        public AccountModel SelectedAccount
+        {
+            get => _selectedAccount;
+            set { _selectedAccount = value; OnPropertyChanged(nameof(SelectedAccount)); }
+        }
+        
+
+        private IAccountRepo _repo = new AccountMemoryRepo();
+        public ObservableCollection<AccountModel> Accounts
+        {
+            get
+            {
+                return _repo.ReadAllAccount();
+            }
+        }
+        public ICommand CreateCommand { get; }
+        public ICommand UpdateCommand { get; }
+        public ICommand DeleteCommand { get; }
+
+        public ICommand WithdrawCommand { get; }
+        public ICommand DepositCommand { get; }
+
+
+        public AccountViewModel()
+        {
+            this.NewAccount = new AccountModel
+            {
+                AccNo = 0,
+                Name = "",
+                Balance = 0,
+                AccType = "savings",
+                Email = " sample@gmail.com",
+                PhNo = "xxxx-xxxx",
+                Address = "",
+                IsActive = true,
+                InterestPercentage = "0",
+                TransactionCount = 0,
+                LastTransactionDate = DateTime.Now,
+                Nominee = ""
+            };
+
+
+
+            CreateCommand = new RelayCommand(Create);
+            UpdateCommand = new RelayCommand(Update);
+            DeleteCommand = new RelayCommand(Delete);
+            WithdrawCommand = new RelayCommand(Withdraw);
+            DepositCommand = new RelayCommand(Deposit);
+        }
+        public void Create()
+        {
+            AccountModel newAccount = new AccountModel
+            {
+                AccNo = NewAccount.AccNo,
+                Name = NewAccount.Name,
+                Balance = NewAccount.Balance,
+                AccType = NewAccount.AccType,
+                Email = NewAccount.Email,
+                PhNo = NewAccount.PhNo,
+                Address = NewAccount.Address,
+                IsActive = NewAccount.IsActive,
+                InterestPercentage = NewAccount.InterestPercentage,
+                TransactionCount = NewAccount.TransactionCount,
+                LastTransactionDate = NewAccount.LastTransactionDate,
+                Nominee = NewAccount.Nominee
+            };
+            var result = MessageBox.Show(messageBoxText: "Are you sure to create?",
+                    caption: "Confirm",
+                    button: MessageBoxButton.YesNo,
+                    icon: MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            _repo.Create(newAccount);
+            this.NewAccount = new AccountModel { AccNo = 0, Name = "", Balance = 0, AccType = "", Email = "", PhNo = "", Address = "", IsActive = false, InterestPercentage = "0", TransactionCount = 0, LastTransactionDate = DateTime.Now };
+            
+            result = MessageBox.Show(messageBoxText: "Created Successfully",
+                    caption: "Alert",
+                    button: MessageBoxButton.OK,
+                    icon: MessageBoxImage.Information);
+
+            if (NewWindowClose != null)
+            {
+                NewWindowClose();
+            }
+        }
+
+        public void Update()
+        {
+            if (this.SelectedAccount == null)
+            {
+                return;
+            }
+
+            _repo.UpdateAccount(this.SelectedAccount);
+            this.SelectedAccount = this.SelectedAccount;
+            var result = MessageBox.Show(messageBoxText: "Updated Successfully",
+                    caption: "Alert",
+                    button: MessageBoxButton.OK,
+                    icon: MessageBoxImage.Information);
+
+            if (EditWindowClose != null)
+            {
+                EditWindowClose();
+            }
+        }
+        public void Delete()
+        {
+            if (this.SelectedAccount == null)
+            {
+                return;
+            }
+            this.Accounts.Remove(this.SelectedAccount);
+            this.SelectedAccount = null;
+        }
+        public void Withdraw()
+        {
+            var result = MessageBox.Show(messageBoxText: "Are you sure to Withdraw?",
+                   caption: "Confirm",
+                   button: MessageBoxButton.YesNo,
+                   icon: MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            _repo.Withdraw(AccountNumber, Amount);
+            this.AccountNumber = 0;
+            this.Amount = 0;
+        }
+        public void Deposit()
+        {
+            var result = MessageBox.Show(messageBoxText: "Are you sure to Deposit?",
+                   caption: "Confirm",
+                   button: MessageBoxButton.YesNo,
+                   icon: MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            _repo.Deposit(AccountNumber, Amount);
+
+
+            this.AccountNumber = 0;
+            this.Amount = 0;
+        }
+
     }
+
 }
--------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AddAccountWindow.xaml
 
 <Window x:Class="BankManagementProject.AddAccountWindow"
@@ -475,7 +724,7 @@ AddAccountWindow.xaml
 
     </Canvas>
 </Window>
-------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 AddAccountWindow.xaml.cs
 
 using System;
@@ -519,18 +768,7 @@ namespace BankManagementProject
         }
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
-App.xaml
-<Application x:Class="BankManagementProject.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:BankManagementProject"
-             StartupUri="LoginPageWindow.xaml">
-    <Application.Resources>
-         
-    </Application.Resources>
-</Application>
----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 DashBoardWindow.xaml
 
 <Window x:Class="BankManagementProject.DashBoardWindow"
@@ -548,8 +786,8 @@ DashBoardWindow.xaml
 
     </Canvas>
 </Window>
----------------------------------------------------------------------------------------------------------------------------------
-DashbBoardWindow.xaml.cs
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DashBoardWindow.xaml.cs
 
 using System;
 using System.Collections.Generic;
@@ -603,7 +841,7 @@ namespace BankManagementProject
         }
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 DepositWindow.xaml
 
 <Window x:Class="BankManagementProject.DepositWindow"
@@ -631,7 +869,7 @@ DepositWindow.xaml
 
     </Canvas>
 </Window>
---------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 DepositWindow.xaml.cs
 
 using System;
@@ -668,7 +906,7 @@ namespace BankManagementProject
         }
     }
 }
----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 EditAccountWindow.xaml
 
 <Window x:Class="BankManagementProject.EditAccountWindow"
@@ -722,7 +960,8 @@ EditAccountWindow.xaml
         <TextBox x:Name="txtNominee" Canvas.Left="402" TextWrapping="Wrap" Canvas.Top="360" Width="120" Text="{Binding SelectedAccount.Nominee}" IsEnabled="False"/>
     </Canvas>
 </Window>
----------------------------------------------------------------------------------------------------------------------------------EditAccountWindow.xaml.cs
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+EditAccountWindow.xaml.cs
 
 using System;
 using System.Collections.Generic;
@@ -761,48 +1000,36 @@ namespace BankManagementProject
         }
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 IAccountRepo.cs
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using BankManagementProject;
-
 
 namespace BankManagementProject
 {
-    /// <summary>
-    /// Interaction logic for EditAccountWindow.xaml
-    /// </summary>
-    public partial class EditAccountWindow : Window
+    public interface IAccountRepo
     {
-        public EditAccountWindow()
-        {
-            InitializeComponent();
-            DataContext = AccountConfig.VueModel;
+        void Create(AccountModel accModel);
 
-        }
+        void UpdateAccount(AccountModel accModel);
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
-        }
+        void DeleteAccount(AccountModel account);
+        void Deposit(int acNo, int Amount);
+        void Withdraw(int acNo, int Amount);
+        void CalculateInterestAndUpdateBalance();
+        ObservableCollection<AccountModel> ReadAllAccount();
+
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 Logger.cs
+
 
 using System;
 using System.Collections.Generic;
@@ -818,7 +1045,7 @@ namespace BankManagementProject
         public static readonly ILog log = LogManager.GetLogger(typeof(Logger));
     }
 }
----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 LoginPageWindow.xaml
 
 <Window x:Class="BankManagementProject.LoginPageWindow"
@@ -845,7 +1072,7 @@ LoginPageWindow.xaml
         </Label>
     </Canvas>
 </Window>
----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 LoginPageWindow.xaml.cs
 
 using System;
@@ -892,7 +1119,7 @@ namespace BankManagementProject
         }
     }
 }
---------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 RelayCommand.cs
 
 using System;
@@ -933,7 +1160,7 @@ namespace BankManagementProject
         }
     }
 }
----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 WithdrawWindow.xaml
 
 <Window x:Class="BankManagementProject.WithdrawWindow"
@@ -961,7 +1188,8 @@ WithdrawWindow.xaml
 
     </Canvas>
 </Window>
----------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 WithdrawWindow.xaml.cs
 
 using System;
@@ -969,36 +1197,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace BankManagementProject
 {
-    /// <summary>
-    /// Interaction logic for WithdrawWindow.xaml
-    /// </summary>
-    public partial class WithdrawWindow : Window
+    public class RelayCommand : ICommand
     {
-        public WithdrawWindow()
+        private readonly Action _execute;
+        private readonly Func<bool> _canExecute;
+
+        public RelayCommand(Action execute, Func<bool> canExecute = null)
         {
-            InitializeComponent();
-            this.DataContext = AccountConfig.VueModel;
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+        //
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+        //
+        public bool CanExecute(object parameter)
+        {
+            return _canExecute == null || _canExecute();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        public void Execute(object parameter)
         {
-            e.Cancel = true;
-            this.Hide();
+            _execute();
         }
     }
 }
----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 AccountMemoryRepoTests.cs
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -1104,6 +1336,7 @@ namespace BankManagementProject.Tests
                 InterestPercentage = "0",
                 TransactionCount = 0,
                 LastTransactionDate = DateTime.Now,
+                Nominee = ""
             };
 
             _repo.Deposit(account.AccNo, 500);
@@ -1123,7 +1356,9 @@ namespace BankManagementProject.Tests
         }
     }
 }
----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 
