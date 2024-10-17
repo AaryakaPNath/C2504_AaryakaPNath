@@ -1,0 +1,373 @@
+HEALTHMETRICS
+
+IHealthMetricsRepo.cs
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ProjectPHT.Entities;
+
+namespace ProjectPHT.Repo
+{
+    public interface IHealthMetricsRepo 
+    {
+        void CreateHealthMetrics(HealthMetric healthMetric);
+        ObservableCollection<HealthMetric> ReadAllHealthMetrics();
+
+        //void InsightGeneration(int Heartrate, int Bpsys, int Bpdys, decimal Actlevel);
+    }
+}
+------------------------------------------------------------------------------------------------------------------------
+
+EFHealthMetricsRepo.connectionString
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ProjectPHT.Entities;
+using System.Windows;
+using ProjectPHT.Repo;
+
+namespace ProjectPHT.EFRepo
+{
+    public class EFHealthMetricsRepo : IHealthMetricsRepo
+    {
+        //string HeartRateNotification;
+        //string BpSysNotification;
+        //string BpdysNotification;
+        //string ActLevelNotification;
+
+        //int heartRateThreshold = 75;
+        //int bpSysThreshold = 23;
+        //int bpDysThresholdc = 89;
+        //int activityLevel = 45;
+
+        //public string InsightGeneration(int Heartrate,int Bpsys,int Bpdys,decimal Actlevel)
+        //{
+        //    if (HeartRateNotification == null) { }
+        //    else if
+
+        private readonly PHT_DbEntities _context;
+
+        public EFHealthMetricsRepo()
+        {
+            _context = new PHT_DbEntities();
+        }
+
+        public void CreateHealthMetrics(HealthMetric healthMetric)
+        {
+            //MessageBox.Show($"working.....");
+            try
+            {
+                _context.HealthMetrics.Add(healthMetric);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{ex.InnerException}");
+            }
+
+
+
+        }
+
+        public void InsightGeneration(int Heartrate, int Bpsys, int Bpdys, decimal Actlevel)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public ObservableCollection<HealthMetric> ReadAllHealthMetrics()
+        {
+            return new ObservableCollection<HealthMetric>(_context.HealthMetrics.ToList());
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+
+DailyHealthMetricsEntryViewModel.connectionString
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ProjectPHT.Commands;
+using ProjectPHT.EFRepo;
+using ProjectPHT.Repo;
+using System.Windows.Input;
+using System.Windows;
+using ProjectPHT.Entities;
+
+namespace ProjectPHT.ViewModels
+{
+   
+        public delegate void DWidnowClose();
+        public delegate bool DFormValid();
+
+        public class DailyHealthMetrixEntryViewModel : ViewModelBase
+        {
+
+            private HealthMetric _newHealthMetricl = null;
+
+            public DWidnowClose NewWindowClose;
+            public DWidnowClose EditWindowClose;
+            private ObservableCollection<HealthMetric> _healthMetrics;
+
+            public HealthMetric NewHealthMetric
+            {
+                get { return _newHealthMetricl; }
+                set
+                {
+                    _newHealthMetricl = value;
+                    OnPropertyChanged(nameof(NewHealthMetric));
+                }
+            }
+            //private readonly IHealthMetricsRepo _repo;
+            private IHealthMetricsRepo _repo = new EFHealthMetricsRepo();
+
+            public ObservableCollection<HealthMetric> HealthMetrics
+            {
+                get
+                { return _healthMetrics; }
+                set
+                {
+                    _healthMetrics = value; OnPropertyChanged(nameof(HealthMetrics));
+                }
+            }
+            public ICommand CreateCommand { get; }
+
+
+            public DailyHealthMetrixEntryViewModel()
+            {
+                LoadHealthMetrics();
+                CreateCommand = new RelayCommand(CreateHealthMetrics);
+                //NewHealthMetric.MetricDate = DateTime.Now;
+                this.NewHealthMetric = new HealthMetric
+                {
+                    MetricID = 101,
+                    HeartRate = 0,
+                    BloodPressureSystolic = 0,
+                    BloodPressureDiastolic = 0,
+                    ActivityLevel = 0,
+                    MetricDate = DateTime.Now,
+                    CreatedAt = DateTime.Now,
+                    UserID = 3,
+                };
+            }
+            public void LoadHealthMetrics()
+            {
+                HealthMetrics = _repo.ReadAllHealthMetrics();
+            }
+            public void CreateHealthMetrics()
+            {
+                //MessageBox.Show($"viewmodel is working..");
+                HealthMetric newDailyHealthMetrixEntryViewModel = new HealthMetric
+                {
+                    MetricID = NewHealthMetric.MetricID,
+                    HeartRate = NewHealthMetric.HeartRate,
+                    BloodPressureSystolic = NewHealthMetric.BloodPressureSystolic,
+                    BloodPressureDiastolic = NewHealthMetric.BloodPressureDiastolic,
+                    ActivityLevel = NewHealthMetric.ActivityLevel,
+                    MetricDate = NewHealthMetric.MetricDate,
+                    CreatedAt = DateTime.Now,
+                    UserID = NewHealthMetric.UserID,
+
+                };
+
+
+
+                try
+                {
+                    var result = MessageBox.Show(messageBoxText: "Are you sure to create?",
+                    caption: "Confirm",
+                    button: MessageBoxButton.YesNo,
+                    icon: MessageBoxImage.Question);
+                    if (result != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+                    _repo.CreateHealthMetrics(NewHealthMetric);
+                    result = MessageBox.Show(messageBoxText: "Inserted Data Successfully",
+                    caption: "Alert",
+                    button: MessageBoxButton.OK,
+                    icon: MessageBoxImage.Information);
+                    LoadHealthMetrics();
+
+
+
+                    if (NewWindowClose != null)
+                    {
+                        NewWindowClose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ex.Message}");
+                }
+            }
+
+
+        }
+    }
+
+----------------------------------------------------------------------------------------------------------------------------
+DailyHealthMetrixEntryWindow.xaml
+
+<Canvas Background="#FFD2D0D0">
+    <TextBlock Text="Daily Health Metrix Entry" FontSize="30" Canvas.Left="10" Canvas.Top="13" HorizontalAlignment="Center" VerticalAlignment="Top" Width="776" Background="#FFF6ECEC" TextAlignment="Center" Height="46">
+
+    </TextBlock>
+    <TextBlock Height="31" Canvas.Left="119" TextWrapping="Wrap" Text="Heart Rate" Canvas.Top="84" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" />
+    <TextBlock Height="31" Canvas.Left="120" TextWrapping="Wrap" Text="BP Systolic" Canvas.Top="122" Width="118" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+    <TextBlock Height="31" Canvas.Left="121" TextWrapping="Wrap" Text="BP Diastolic" Canvas.Top="164" Width="118" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+    <TextBlock Height="31" Canvas.Left="120" TextWrapping="Wrap" Text="Activity Level" Canvas.Top="203" Width="119" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+    <TextBlock Height="31" Canvas.Left="120" TextWrapping="Wrap" Text="Metrix Date" Canvas.Top="243" Width="119" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.416,0.587"/>
+    <TextBox Height="30" Canvas.Left="320" TextWrapping="Wrap"  Canvas.Top="84" Width="144" Text="{Binding NewHealthMetric.HeartRate}"/>
+    <TextBox Height="30" Canvas.Left="321" TextWrapping="Wrap" Canvas.Top="125" Width="144" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding NewHealthMetric.BloodPressureSystolic }"/>
+    <TextBox Height="30" Canvas.Left="321" TextWrapping="Wrap"  Canvas.Top="165" Width="144" HorizontalAlignment="Left" VerticalAlignment="Top" Text="{Binding NewHealthMetric.BloodPressureDiastolic }"/>
+    <TextBox Height="30" Canvas.Left="320" TextWrapping="Wrap" Canvas.Top="204" Width="144" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding NewHealthMetric.ActivityLevel }"/>
+    <TextBox Height="30" Canvas.Left="322" TextWrapping="Wrap" Canvas.Top="244" Width="144" HorizontalAlignment="Left" VerticalAlignment="Top" Text="{Binding NewHealthMetric.MetricDate }"/>
+    <Button x:Name="btnSave" Content="Save" Height="31" Canvas.Left="322" Canvas.Top="304" Width="95" FontSize="18" Background="#FFDA7E7E" Command="{Binding CreateCommand}"/>
+    <Button x:Name="btnDeviceSync" Content="Device Sync" Height="31" Canvas.Left="455" Canvas.Top="304" Width="105" FontSize="18" Background="#FFDA7E7E" HorizontalAlignment="Left" VerticalAlignment="Center" Click="btnDeviceSync_Click"/>
+
+</Canvas>
+---------------------------------------------------------------------------------------------------------------------------------
+DailyHealthMetrixEntryWindow.xaml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace ProjectPHT.Pages
+{
+    /// <summary>
+    /// Interaction logic for DailyHealthMetrixEntryWindow.xaml
+    /// </summary>
+    public partial class DailyHealthMetrixEntryWindow : Window
+    {
+        public DailyHealthMetrixEntryWindow()
+        {
+            InitializeComponent();
+            DataContext = PHTConfig.dailyHealthMetrixEntryViewModel;
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+        }
+
+        private void btnDeviceSync_Click(object sender, RoutedEventArgs e)
+        {
+            PHTConfig.deviceIntegrationWindow.Show();
+        }
+
+   
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+FAQWindow.xaml
+
+<Grid Background="#F9F9F9">
+    <StackPanel Margin="10">
+        <TextBlock Text="Frequently Asked Questions" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+        <!-- FAQ Item 1 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="What is the Personalized Health Tracker?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="The Personalized Health Tracker is an application designed to monitor your daily health metrics, including heart rate, blood pressure, and activity levels, while generating personalized health insights to help you manage your well-being." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FAQ Item 2 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="How do I create an account for the app?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="To create an account, visit the sign-up page, enter your email, choose a password, and provide your name and contact details. You can also sign up using your Google or Facebook account." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FAQ Item 3 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="How can I log my daily health metrics?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="You can log your daily health metrics by navigating to the Daily Health Metrics Entry Page, where you can manually input your data or sync it from connected wearable devices." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FAQ Item 4 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="What types of health metrics can I track?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="The app allows you to track various health metrics, including heart rate, blood pressure, and activity levels, providing a comprehensive overview of your health." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FAQ Item 5 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="How does the app generate personalized health insights?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="The app analyzes your logged health data to generate insights and suggestions tailored to your health patterns, helping you make informed decisions about your wellness." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FAQ Item 6 -->
+        <Border Margin="0,0,0,10" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="Can I sync data from my wearable devices?" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="Yes, the app supports synchronization with various wearable devices. You can connect your device through the Device Integration / Sync Page and follow the instructions provided." FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</Grid>
+------------------------------------------------------------------------------------------------------------------------------
+
+FAQWindow,xaml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+
+namespace ProjectPHT.Pages
+{
+    /// <summary>
+    /// Interaction logic for FAQWindow.xaml
+    /// </summary>
+    public partial class FAQWindow : Window
+    {
+        public FAQWindow()
+        {
+            InitializeComponent();
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------
