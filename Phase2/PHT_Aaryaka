@@ -22,7 +22,7 @@ namespace ProjectPHT.Repo
 }
 ------------------------------------------------------------------------------------------------------------------------
 
-EFHealthMetricsRepo.connectionString
+EFHealthMetricsRepo.cs
 
 using System;
 using System.Collections.Generic;
@@ -91,7 +91,7 @@ namespace ProjectPHT.EFRepo
 
 ----------------------------------------------------------------------------------------------------------------------------
 
-DailyHealthMetricsEntryViewModel.connectionString
+DailyHealthMetricsEntryViewModel.cs
 
 using System;
 using System.Collections.Generic;
