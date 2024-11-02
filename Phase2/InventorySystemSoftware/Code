@@ -1,0 +1,1822 @@
+CONVERTERS
+BoolToVisibilityConverter
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+
+namespace InventorySystemSoftware1.Converters
+{
+    public class BoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // Convert boolean to Visibility
+            if (value is bool boolValue)
+            {
+                return boolValue ? Visibility.Visible : Visibility.Collapsed; // Adjust as needed
+            }
+            return Visibility.Collapsed; // Default if value is not a boolean
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // Convert Visibility back to boolean
+            if (value is Visibility visibility)
+            {
+                return visibility == Visibility.Visible; // Return true if Visible
+            }
+            return false; // Default if value is not a Visibility
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+NullToBoolConverter
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Data;
+
+namespace InventorySystemSoftware1.Converters
+{
+    public class NullToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value != null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+MEMORY
+OrderSQLRepo.cs
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using InventorySystemSoftware1.Models;
+using InventorySystemSoftware1.Repos;
+
+namespace InventorySystemSoftware1.Memory
+{
+    /// <summary>
+    /// Repository for managing orders in the database, implementing CRUD operations and stock validation.
+    /// </summary>
+    public class OrderSQLRepo : IOrderRepo
+    {
+        private string _connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Inventory_Db;Integrated Security=True;";
+        private static OrderSQLRepo _instance;
+
+        /// <summary>
+        /// Singleton instance of the OrderSQLRepo.
+        /// </summary>
+        public static OrderSQLRepo Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new OrderSQLRepo();
+                }
+                return _instance;
+            }
+        }
+
+        /// <summary>
+        /// Adds a new order to the Orders table.
+        /// </summary>
+        public void AddOrder(Order order)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    var command = new SqlCommand("INSERT INTO Orders (StockCode, StockName, Quantity, UnitPrice, TotalPrice) VALUES (@StockCode, @StockName, @Quantity, @UnitPrice, @TotalPrice)", connection);
+                    command.Parameters.AddWithValue("@StockCode", order.StockCode);
+                    command.Parameters.AddWithValue("@StockName", order.StockName);
+                    command.Parameters.AddWithValue("@Quantity", order.Quantity);
+                    command.Parameters.AddWithValue("@UnitPrice", order.UnitPrice);
+                    command.Parameters.AddWithValue("@TotalPrice", order.TotalPrice);
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deletes an order from the Orders table based on stock code, quantity, and total price.
+        /// </summary>
+        public void DeleteOrder(Order order)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("DELETE FROM Orders WHERE StockCode = @StockCode AND Quantity = @Quantity AND TotalPrice = @TotalPrice", connection);
+                command.Parameters.AddWithValue("@StockCode", order.StockCode);
+                command.Parameters.AddWithValue("@StockName", order.StockName);
+                command.Parameters.AddWithValue("@Quantity", order.Quantity);
+                command.Parameters.AddWithValue("@TotalPrice", order.TotalPrice);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Places an order by validating stock and updating the Orders and Stocks tables.
+        /// </summary>
+        public void PlaceOrder(ObservableCollection<Order> orders)
+        {
+            foreach (var order in orders)
+            {
+                try
+                {
+                    if (!ValidateStockAvailability(order.StockCode, order.Quantity))
+                    {
+                        Console.WriteLine($"Not enough stock for {order.StockCode}. Order not placed.");
+                        continue;
+                    }
+                    UpdateStockQuantity(order.StockCode, order.Quantity);
+                    AddOrder(order);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error placing order for {order.StockCode}: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates if sufficient stock is available for an order.
+        /// </summary>
+        public bool ValidateStockAvailability(string stockCode, int requiredQuantity)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("SELECT StockCount FROM Stocks WHERE StockCode = @StockCode", connection);
+                command.Parameters.AddWithValue("@StockCode", stockCode);
+                var stockCount = (int)command.ExecuteScalar();
+                return stockCount >= requiredQuantity;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all orders from the Orders table.
+        /// </summary>
+        public ObservableCollection<Order> GetAllOrders()
+        {
+            var orders = new ObservableCollection<Order>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("SELECT StockCode, StockName, Quantity, UnitPrice, TotalPrice FROM Orders", connection);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var order = new Order
+                        {
+                            StockCode = reader["StockCode"].ToString(),
+                            StockName = reader["StockName"].ToString(),
+                            Quantity = (int)reader["Quantity"],
+                            UnitPrice = (decimal)reader["UnitPrice"],
+                            TotalPrice = (decimal)reader["TotalPrice"]
+                        };
+                        orders.Add(order);
+                    }
+                }
+            }
+            return orders;
+        }
+
+        /// <summary>
+        /// Updates stock quantity in the Stocks table after an order is placed.
+        /// </summary>
+        public void UpdateStockQuantity(string stockCode, int quantity)
+        {
+            string query = "UPDATE Stocks SET StockCount = StockCount - @Quantity WHERE StockCode = @StockCode";
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Quantity", quantity);
+                    cmd.Parameters.AddWithValue("@StockCode", stockCode);
+                    conn.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        throw new Exception("Stock item not found for update.");
+                    }
+                }
+            }
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+StockSQLRepo.cs
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.Remoting.Contexts;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Markup;
+using System.Windows.Media;
+using InventorySystemSoftware1.Models;
+using InventorySystemSoftware1.Repos;
+namespace InventorySystemSoftware1.Memory
+{
+    public class StockSQLRepo : IStockRepo
+    {
+        // Singleton instance
+        private static StockSQLRepo _instance;
+
+        // Database connection string
+        private string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Inventory_Db;Integrated Security=True;";
+
+        // Singleton pattern for the repository
+        public static StockSQLRepo Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new StockSQLRepo();
+                }
+                return _instance;
+            }
+        }
+
+        // Private constructor to enforce singleton pattern
+        private StockSQLRepo() { }
+
+        /// <summary>
+        /// Retrieves all stocks from the database.
+        /// </summary>
+        /// <returns>ObservableCollection of Stock objects.</returns>
+        public ObservableCollection<Stock> GetAllStocks()
+        {
+            ObservableCollection<Stock> stocks = new ObservableCollection<Stock>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT * FROM Stocks";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Stock stock = new Stock
+                        {
+                            StockCode = (string)reader["StockCode"],
+                            StockName = (string)reader["StockName"],
+                            UnitPrice = (decimal)reader["UnitPrice"],
+                            StockCount = (int)reader["StockCount"]
+                        };
+                        stocks.Add(stock);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error reading stocks from the database", ex);
+            }
+            return stocks;
+        }
+
+        /// <summary>
+        /// Adds a new stock to the database.
+        /// </summary>
+        /// <param name="stock">The stock object to add.</param>
+        public void AddStock(Stock stock)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "INSERT INTO Stocks (StockCode, StockName, UnitPrice, StockCount) VALUES (@StockCode, @StockName, @UnitPrice, @StockCount)";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@StockCode", stock.StockCode);
+                    cmd.Parameters.AddWithValue("@StockName", stock.StockName);
+                    cmd.Parameters.AddWithValue("@UnitPrice", stock.UnitPrice);
+                    cmd.Parameters.AddWithValue("@StockCount", stock.StockCount);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding new stock to the database", ex);
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing stock in the database.
+        /// </summary>
+        /// <param name="stock">The stock object to update.</param>
+        public void UpdateStock(Stock stock)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "UPDATE Stocks SET StockName = @StockName, UnitPrice = @UnitPrice, StockCount = @StockCount WHERE StockCode = @StockCode";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@StockCode", stock.StockCode);
+                    cmd.Parameters.AddWithValue("@StockName", stock.StockName);
+                    cmd.Parameters.AddWithValue("@UnitPrice", stock.UnitPrice);
+                    cmd.Parameters.AddWithValue("@StockCount", stock.StockCount);
+
+                    conn.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        throw new Exception("Stock item not found for update.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating stock in the database", ex);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a stock from the database.
+        /// </summary>
+        /// <param name="stock">The stock object to delete.</param>
+        public void DeleteStock(Stock stock)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM Stocks WHERE StockCode = @StockCode";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@StockCode", stock.StockCode);
+
+                    conn.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        throw new Exception("Stock item not found for deletion.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting stock from the database", ex);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a stock by its stock code.
+        /// </summary>
+        /// <param name="selectedStockCode">The stock code of the stock to retrieve.</param>
+        /// <returns>A Stock object if found; otherwise, null.</returns>
+        public Stock GetStockByCode(string selectedStockCode)
+        {
+            Stock stock = null;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT * FROM Stocks WHERE StockCode = @StockCode";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@StockCode", selectedStockCode);
+
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        stock = new Stock
+                        {
+                            StockCode = (string)reader["StockCode"],
+                            StockName = (string)reader["StockName"],
+                            UnitPrice = (decimal)reader["UnitPrice"],
+                            StockCount = (int)reader["StockCount"]
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error reading stock from the database", ex);
+            }
+            return stock;
+        }
+
+        /// <summary>
+        /// Retrieves all unique stock codes from the database.
+        /// </summary>
+        /// <returns>ObservableCollection of stock codes as strings.</returns>
+        public ObservableCollection<string> GetAllStockCodes()
+        {
+            ObservableCollection<string> stockCodes = new ObservableCollection<string>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT DISTINCT StockCode FROM Stocks";
+                    SqlCommand cmd = new SqlCommand(query, conn);
+
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        stockCodes.Add((string)reader["StockCode"]);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error reading stock codes from the database", ex);
+            }
+            return stockCodes;
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+MODELS
+Order.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace InventorySystemSoftware1.Models
+{
+    /// <summary>
+    /// Represents an order in the inventory system.
+    /// </summary>
+    public class Order
+    {
+        /// <summary>
+        /// Gets or sets the unique code of the stock item.
+        /// </summary>
+        public string StockCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the stock item.
+        /// </summary>
+        public string StockName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quantity of the stock item ordered.
+        /// </summary>
+        public int Quantity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unit price of the stock item.
+        /// </summary>
+        public decimal UnitPrice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total price for the order (calculated as Quantity * UnitPrice).
+        /// </summary>
+        public decimal TotalPrice { get; set; }
+    }
+}
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Stock.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace InventorySystemSoftware1.Models
+{
+    /// <summary>
+    /// Represents a stock item in the inventory system.
+    /// </summary>
+    public class Stock : INotifyPropertyChanged
+    {
+        private string _stockCode;
+        private string _stockName;
+        private decimal _unitPrice;
+        private int _stockCount;
+
+        /// <summary>
+        /// Gets or sets the unique code of the stock item.
+        /// </summary>
+        public string StockCode
+        {
+            get => _stockCode;
+            set
+            {
+                if (_stockCode != value)
+                {
+                    _stockCode = value;
+                    OnPropertyChanged(nameof(StockCode));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the stock item.
+        /// </summary>
+        public string StockName
+        {
+            get => _stockName;
+            set
+            {
+                if (_stockName != value)
+                {
+                    _stockName = value;
+                    OnPropertyChanged(nameof(StockName));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the unit price of the stock item.
+        /// </summary>
+        public decimal UnitPrice
+        {
+            get => _unitPrice;
+            set
+            {
+                if (_unitPrice != value)
+                {
+                    _unitPrice = value;
+                    OnPropertyChanged(nameof(UnitPrice));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the available count of the stock item.
+        /// </summary>
+        public int StockCount
+        {
+            get => _stockCount;
+            set
+            {
+                if (_stockCount != value)
+                {
+                    _stockCount = value;
+                    OnPropertyChanged(nameof(StockCount));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Triggers the PropertyChanged event for the specified property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+REPOS
+IOrderRepo.cs
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using InventorySystemSoftware1.Models;
+
+namespace InventorySystemSoftware1.Repos
+{
+    /// <summary>
+    /// Interface for managing orders in the inventory system.
+    /// Provides methods to add, delete, and validate orders and to check stock availability.
+    /// </summary>
+    public interface IOrderRepo
+    {
+        /// <summary>
+        /// Adds a new order to the database.
+        /// </summary>
+        /// <param name="order">The order to be added.</param>
+        void AddOrder(Order order);
+
+        /// <summary>
+        /// Deletes an existing order from the database.
+        /// </summary>
+        /// <param name="order">The order to be deleted.</param>
+        void DeleteOrder(Order order);
+
+        /// <summary>
+        /// Places multiple orders.
+        /// </summary>
+        /// <param name="orders">The collection of orders to be placed.</param>
+        void PlaceOrder(ObservableCollection<Order> orders); // Change this to accept a List<Order>
+
+        /// <summary>
+        /// Validates if there is enough stock available for the specified stock code.
+        /// </summary>
+        /// <param name="stockCode">The stock code to validate.</param>
+        /// <param name="requiredQuantity">The quantity required.</param>
+        /// <returns>True if sufficient stock is available; otherwise, false.</returns>
+        bool ValidateStockAvailability(string stockCode, int requiredQuantity);
+
+        /// <summary>
+        /// Retrieves all orders from the database.
+        /// </summary>
+        /// <returns>An ObservableCollection of all orders.</returns>
+        ObservableCollection<Order> GetAllOrders();
+
+        /// <summary>
+        /// Updates the stock quantity for a specific stock item.
+        /// </summary>
+        /// <param name="stockCode">The stock code of the item.</param>
+        /// <param name="quantity">The quantity to update.</param>
+        void UpdateStockQuantity(string stockCode, int quantity);
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+IStockRepo.cs
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using InventorySystemSoftware1.Models;
+
+namespace InventorySystemSoftware1.Repos
+{
+    /// <summary>
+    /// Interface for managing stock in the inventory system.
+    /// Provides methods to retrieve, add, update, and delete stock items.
+    /// </summary>
+    public interface IStockRepo
+    {
+        /// <summary>
+        /// Retrieves all stocks from the database.
+        /// </summary>
+        /// <returns>An ObservableCollection of all stocks.</returns>
+        ObservableCollection<Stock> GetAllStocks();
+
+        /// <summary>
+        /// Adds a new stock item to the database.
+        /// </summary>
+        /// <param name="stock">The stock item to be added.</param>
+        void AddStock(Stock stock);
+
+        /// <summary>
+        /// Updates an existing stock item in the database.
+        /// </summary>
+        /// <param name="stock">The stock item to be updated.</param>
+        void UpdateStock(Stock stock);
+
+        /// <summary>
+        /// Deletes a stock item from the database.
+        /// </summary>
+        /// <param name="stock">The stock item to be deleted.</param>
+        void DeleteStock(Stock stock);
+
+        /// <summary>
+        /// Retrieves a stock item by its stock code.
+        /// </summary>
+        /// <param name="SelectedStockCode">The stock code of the item to retrieve.</param>
+        /// <returns>The stock item matching the specified stock code, or null if not found.</returns>
+        Stock GetStockByCode(string SelectedStockCode);
+
+        /// <summary>
+        /// Retrieves all unique stock codes from the database.
+        /// </summary>
+        /// <returns>An ObservableCollection of all stock codes.</returns>
+        ObservableCollection<string> GetAllStockCodes();
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+VIEWMODELS
+OrderViewModel.cs
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using InventorySystemSoftware1.Memory;
+using InventorySystemSoftware1.Models;
+using InventorySystemSoftware1.Repos;
+
+namespace InventorySystemSoftware1.ViewModels
+{
+    /// <summary>
+    /// ViewModel for managing orders in the inventory system.
+    /// Provides commands to add, delete, and place orders.
+    /// </summary>
+    public class OrderViewModel : ViewModelBase
+    {
+        private IOrderRepo _orderRepo;
+        private IStockRepo _stockRepo;
+        private Order _selectedOrder;
+        private string _selectedStockCode;
+        private int _orderQuantity;
+        private decimal _totalOrderAmount;
+
+        private ObservableCollection<Order> _orders;
+        /// <summary>
+        /// Gets or sets the collection of orders.
+        /// </summary>
+        public ObservableCollection<Order> Orders
+        {
+            get
+            {
+                return _orders;
+            }
+            set
+            {
+                _orders = value;
+                onPropertyChanged(nameof(Orders));
+            }
+        }
+
+        private ObservableCollection<string> stockCodes;
+        /// <summary>
+        /// Gets or sets the collection of stock codes available for selection.
+        /// </summary>
+        public ObservableCollection<string> StockCodes
+        {
+            get
+            {
+                return stockCodes;
+            }
+            set
+            {
+                stockCodes = value;
+                onPropertyChanged(nameof(StockCodes));
+            }
+        }
+
+        private Order newOrder;
+        /// <summary>
+        /// Gets or sets the new order being created.
+        /// </summary>
+        public Order NewOrder
+        {
+            get { return newOrder; }
+            set
+            {
+                newOrder = value;
+                onPropertyChanged(nameof(NewOrder));
+            }
+        }
+
+        private static OrderViewModel _instance;
+
+        /// <summary>
+        /// Singleton instance of the OrderViewModel.
+        /// </summary>
+        public static OrderViewModel Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new OrderViewModel();
+                }
+                return _instance;
+            }
+        }
+
+        /// <summary>
+        /// Loads the stock codes from the stock repository.
+        /// </summary>
+        public void LoadStockCodes()
+        {
+            // _stockRepo = StockSQLRepo.Instance;
+            StockCodes.Clear();
+            var stokeCodes = _stockRepo.GetAllStockCodes();
+            foreach (string stokeCode in stokeCodes)
+            {
+                StockCodes.Add(stokeCode);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderViewModel"/> class.
+        /// </summary>
+        private OrderViewModel()
+        {
+            _orderRepo = OrderSQLRepo.Instance;
+            _stockRepo = StockSQLRepo.Instance;
+            // Orders = _orderRepo.GetAllOrders();
+            Orders = new ObservableCollection<Order>();
+            StockCodes = new ObservableCollection<string>(_stockRepo.GetAllStockCodes());
+            // Assuming stock codes are loaded from stock repo
+
+            AddOrderCommand = new RelayCommand(AddOrder);
+            DeleteOrderCommand = new RelayCommand(DeleteOrder, CanDeleteOrder);
+            PlaceOrderCommand = new RelayCommand(PlaceOrder);
+            UpdateTotalOrderAmount();
+        }
+
+        /// <summary>
+        /// Gets or sets the selected stock code for the order.
+        /// </summary>
+        public string SelectedStockCode
+        {
+            get => _selectedStockCode;
+            set
+            {
+                _selectedStockCode = value;
+                onPropertyChanged(nameof(SelectedStockCode));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the quantity of the order.
+        /// </summary>
+        public int OrderQuantity
+        {
+            get => _orderQuantity;
+            set
+            {
+                _orderQuantity = value;
+                onPropertyChanged(nameof(OrderQuantity));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the total amount for the order.
+        /// </summary>
+        public decimal TotalOrderAmount
+        {
+            get => _totalOrderAmount;
+            set
+            {
+                _totalOrderAmount = value;
+                onPropertyChanged(nameof(TotalOrderAmount));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the currently selected order for deletion.
+        /// </summary>
+        public Order SelectedOrder
+        {
+            get => _selectedOrder;
+            set
+            {
+                _selectedOrder = value;
+                onPropertyChanged(nameof(SelectedOrder));
+            }
+        }
+
+        // Commands
+        /// <summary>
+        /// Command for adding a new order.
+        /// </summary>
+        public ICommand AddOrderCommand { get; }
+
+        /// <summary>
+        /// Command for deleting an existing order.
+        /// </summary>
+        public ICommand DeleteOrderCommand { get; }
+
+        /// <summary>
+        /// Command for placing orders.
+        /// </summary>
+        public ICommand PlaceOrderCommand { get; }
+
+        /// <summary>
+        /// Adds a new order based on the selected stock code and quantity.
+        /// </summary>
+        private void AddOrder()
+        {
+            if (!_orderRepo.ValidateStockAvailability(SelectedStockCode, OrderQuantity))
+            {
+                MessageBox.Show($"Stock limit exceeded");
+                return;
+            }
+
+            var stock = _stockRepo.GetStockByCode(SelectedStockCode);
+            var totalPrice = stock.UnitPrice * OrderQuantity;
+            var newOrder = new Order
+            {
+                StockCode = stock.StockCode,
+                StockName = stock.StockName,
+                Quantity = OrderQuantity,
+                TotalPrice = totalPrice,
+            };
+            Orders.Add(newOrder);
+            UpdateTotalOrderAmount();
+        }
+
+        //private bool CanAddOrder()
+        //{
+        //    return !string.IsNullOrEmpty(SelectedStockCode) && OrderQuantity > 0;
+        //}
+
+        /// <summary>
+        /// Deletes the currently selected order.
+        /// </summary>
+        private void DeleteOrder()
+        {
+            if (SelectedOrder != null)
+            {
+                _orderRepo.DeleteOrder(SelectedOrder);
+                Orders.Remove(SelectedOrder);
+                UpdateTotalOrderAmount();
+            }
+            Reset();
+        }
+
+        /// <summary>
+        /// Determines whether an order can be deleted.
+        /// </summary>
+        /// <returns>True if an order can be deleted; otherwise, false.</returns>
+        private bool CanDeleteOrder()
+        {
+            return SelectedOrder != null;
+        }
+
+        /// <summary>
+        /// Resets the selected stock code and order quantity.
+        /// </summary>
+        public void Reset()
+        {
+            SelectedStockCode = null;
+            OrderQuantity = 0;
+        }
+
+        /// <summary>
+        /// Places the current orders and clears the order list.
+        /// </summary>
+        private void PlaceOrder()
+        {
+            _orderRepo.PlaceOrder(Orders);
+            Orders.Clear(); // Clear order list after placing the order
+
+            StockViewModel.Instance.LoadStocks();
+
+            UpdateTotalOrderAmount();
+            Reset();
+            MessageBox.Show($"Order placed successfully");
+        }
+
+        /// <summary>
+        /// Updates the total order amount based on the current orders.
+        /// </summary>
+        private void UpdateTotalOrderAmount()
+        {
+            TotalOrderAmount = Orders.Sum(o => o.TotalPrice);
+        }
+    }
+}
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+StockViewModel.cs
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using InventorySystemSoftware1.Models;
+using InventorySystemSoftware1.Repos;
+using System.Windows.Input;
+using System.Windows;
+using InventorySystemSoftware1.Memory;
+
+namespace InventorySystemSoftware1.ViewModels
+{
+    /// <summary>
+    /// ViewModel for managing stock items in the inventory system.
+    /// </summary>
+    public class StockViewModel : ViewModelBase
+    {
+        private IStockRepo _repo = StockSQLRepo.Instance;
+
+        // Properties
+        private Stock _selectedStock;
+        private bool isStockSelected;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a stock item is selected.
+        /// </summary>
+        public bool IsStockSelected
+        {
+            get { return isStockSelected; }
+            set
+            {
+                isStockSelected = value;
+                onPropertyChanged(nameof(IsStockSelected));
+            }
+        }
+
+        /// <summary>
+        /// The currently selected stock item for editing or deletion.
+        /// </summary>
+        public Stock SelectedStock
+        {
+            get => _selectedStock;
+            set
+            {
+                if (_selectedStock != value)
+                {
+                    _selectedStock = value;
+                    IsStockSelected = false;
+                    onPropertyChanged(nameof(SelectedStock));
+
+                    // Reset editing state when selection changes
+                    if (IsEditingEnabled)
+                    {
+                        IsEditingEnabled = false;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Collection of all stock items.
+        /// </summary>
+        public ObservableCollection<Stock> Stocks { get; private set; }
+
+        // New properties
+        private Stock _newStock;
+
+        /// <summary>
+        /// Represents a new stock item being added or edited.
+        /// </summary>
+        public Stock NewStock
+        {
+            get => _newStock;
+            set
+            {
+                _newStock = value;
+                onPropertyChanged(nameof(NewStock));
+            }
+        }
+
+        private bool _isEditingEnabled;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the editing mode is enabled.
+        /// </summary>
+        public bool IsEditingEnabled
+        {
+            get => _isEditingEnabled;
+            set
+            {
+                _isEditingEnabled = value;
+                onPropertyChanged(nameof(IsEditingEnabled));
+            }
+        }
+
+        // Commands
+        public ICommand AddStockCommand { get; }
+        public ICommand SaveStockCommand { get; }
+        public ICommand UpdateStockCommand { get; }
+        public ICommand DeleteStockCommand { get; }
+
+        private static StockViewModel _instance;
+
+        /// <summary>
+        /// Singleton pattern for the StockViewModel instance.
+        /// </summary>
+        public static StockViewModel Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new StockViewModel();
+                }
+                return _instance;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StockViewModel"/> class.
+        /// </summary>
+        private StockViewModel()
+        {
+            Stocks = _repo.GetAllStocks();
+            AddStockCommand = new RelayCommand(PrepareNewStock);
+            SaveStockCommand = new RelayCommand(SaveNewStock);
+            UpdateStockCommand = new RelayCommand(EditSelectedStock);
+            DeleteStockCommand = new RelayCommand(DeleteStock);
+            IsStockSelected = true;
+        }
+
+        // Methods
+
+        /// <summary>
+        /// Prepares a new stock item for entry.
+        /// </summary>
+        private void PrepareNewStock()
+        {
+            // Prepare a new stock item
+            NewStock = new Stock();
+            IsEditingEnabled = true; // Show the input area for adding a new stock
+        }
+
+        /// <summary>
+        /// Loads all stocks into the Stocks collection.
+        /// </summary>
+        public void LoadStocks()
+        {
+            var stocks = _repo.GetAllStocks();
+            Stocks.Clear();
+            foreach (var stock in stocks)
+            {
+                Stocks.Add(stock);
+            }
+        }
+
+        /// <summary>
+        /// Saves the new stock item or updates an existing one.
+        /// </summary>
+        private void SaveNewStock()
+        {
+            // Call ValidateStock on Save button click to check for errors
+            var validationErrorMessage = ValidateNewStock();
+
+            if (!string.IsNullOrEmpty(validationErrorMessage))
+            {
+                // If there are validation errors, show the error message
+                MessageBox.Show(validationErrorMessage, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return; // Exit the method to prevent saving
+            }
+
+            if (SelectedStock == null) // Adding new stock
+            {
+                try
+                {
+                    if (string.IsNullOrWhiteSpace(NewStock.StockCode) || string.IsNullOrWhiteSpace(NewStock.StockName))
+                    {
+                        MessageBox.Show("StockCode and StockName cannot be null or empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    _repo.AddStock(NewStock);
+                    Stocks.Add(NewStock);
+                    var orderViewModel = OrderViewModel.Instance;
+                    orderViewModel.LoadStockCodes();
+                    MessageBox.Show("Stock added successfully.", "Alert", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error adding stock: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else // Updating existing stock
+            {
+                try
+                {
+                    SelectedStock.StockCode = NewStock.StockCode;
+                    SelectedStock.StockName = NewStock.StockName;
+                    SelectedStock.UnitPrice = NewStock.UnitPrice;
+                    SelectedStock.StockCount = NewStock.StockCount;
+
+                    // Ensure the update method has the correct parameters
+                    _repo.UpdateStock(SelectedStock);
+                    MessageBox.Show("Stock updated successfully.", "Alert", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error updating stock: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+            IsEditingEnabled = false; // Hide the input area after saving
+            SelectedStock = null; // Clear selection to disable edit mode
+        }
+
+        /// <summary>
+        /// Loads the selected stock item for editing.
+        /// </summary>
+        private void EditSelectedStock()
+        {
+            if (SelectedStock != null)
+            {
+                NewStock = new Stock
+                {
+                    StockCode = SelectedStock.StockCode,
+                    StockName = SelectedStock.StockName,
+                    UnitPrice = SelectedStock.UnitPrice,
+                    StockCount = SelectedStock.StockCount
+                };
+                IsEditingEnabled = true; // Show the input area for editing
+            }
+            else
+            {
+                MessageBox.Show("Please select a stock item to edit.", "Alert", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the selected stock item.
+        /// </summary>
+        private void DeleteStock()
+        {
+            if (SelectedStock == null)
+            {
+                MessageBox.Show("Please select a stock item to delete.", "Alert", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show($"Are you sure you want to delete {SelectedStock.StockName}?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                _repo.DeleteStock(SelectedStock);
+                Stocks.Remove(SelectedStock);
+                SelectedStock = null; // Clear selection
+                MessageBox.Show("Stock deleted successfully.", "Alert", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Validates the new stock item.
+        /// </summary>
+        /// <returns>A validation error message if validation fails; otherwise, an empty string.</returns>
+        private string ValidateNewStock()
+        {
+            // Initialize an empty error message
+            string errorMessage = "";
+
+            if (string.IsNullOrWhiteSpace(NewStock?.StockCode))
+            {
+                errorMessage += "Stock Code cannot be empty.\n";
+            }
+
+            if (string.IsNullOrWhiteSpace(NewStock?.StockName))
+            {
+                errorMessage += "Stock Name cannot be empty.\n";
+            }
+
+            if (!decimal.TryParse(NewStock?.UnitPrice.ToString(), out decimal unitPrice) || unitPrice <= 0)
+            {
+                errorMessage += "Unit Price must be a positive number.\n";
+            }
+
+            if (!int.TryParse(NewStock?.StockCount.ToString(), out int stockCount) || stockCount <= 0)
+            {
+                errorMessage += "Stock Count must be a positive number.\n";
+            }
+
+            return errorMessage; // Return the error message
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ViewModelBase.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace InventorySystemSoftware1.ViewModels
+{
+    /// <summary>
+    /// Represents a base class for view models that implements the INotifyPropertyChanged interface.
+    /// </summary>
+    public class ViewModelBase : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Raises the PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        public void onPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+VIEWS
+DashBoardView.xaml
+<UserControl x:Class="InventorySystemSoftware1.Views.DashBoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InventorySystemSoftware1.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <!-- Main layout grid for the Dashboard View -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Header row for the dashboard -->
+            <RowDefinition Height="Auto" Name="HeaderRow" />
+            <!-- Main content row that takes remaining space -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Inner grid for buttons in the main content area -->
+        <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <!-- Two equal-width columns for button placement -->
+                <ColumnDefinition Width="400" />
+                <ColumnDefinition Width="400" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <!-- Two equal-height rows for button placement -->
+                <RowDefinition Height="150" />
+                <RowDefinition Height="150" />
+            </Grid.RowDefinitions>
+
+            <!-- Button to navigate to the Order screen -->
+            <Button x:Name="btnOrder" Grid.Row="0" Grid.Column="0" Width="100" Height="100" Margin="150,25,150,25" Click="btnOrder_Click">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image Source="/Views/3338992_business tools_justice_scale_court_order_icon.png" 
+                           Width="63" Height="52" RenderTransformOrigin="0.183,0.51" />
+                    <Label Content="Order" Height="26" Width="44" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Button to navigate to the Stock screen -->
+            <Button x:Name="btnStock" Grid.Row="0" Grid.Column="1" Width="100" Height="100" Margin="150,25,150,25" Click="btnStock_Click">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image Source="/Views/Screenshot 2024-10-24 122920.png" 
+                           Width="63" Height="52" RenderTransformOrigin="0.183,0.51" />
+                    <Label Content="Stock" Height="26" Width="44" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <!-- Disabled button for Order History, not implemented yet -->
+            <Button Grid.Row="1" Grid.Column="0" Width="100" Height="100" Content="Order History" IsEnabled="False" />
+
+            <!-- Disabled button for Help, not implemented yet -->
+            <Button Grid.Row="1" Grid.Column="1" Width="100" Height="100" Content="Help" IsEnabled="False" />
+        </Grid>
+    </Grid>
+</UserControl>
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+DashBoardView.xaml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace InventorySystemSoftware1.Views
+{
+    /// <summary>
+    /// Interaction logic for DashBoardView.xaml
+    /// </summary>
+    public partial class DashBoardView : UserControl
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DashBoardView"/> class.
+        /// </summary>
+        public DashBoardView()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Event handler for the Stock button click event.
+        /// Navigates to the Stock view when the button is clicked.
+        /// </summary>
+        private void btnStock_Click(object sender, RoutedEventArgs e)
+        {
+            // Load the Stock view in the main window
+            ((MainWindow)Application.Current.MainWindow).LoadStockView();
+        }
+
+        /// <summary>
+        /// Event handler for the Order button click event.
+        /// Navigates to the Order view when the button is clicked.
+        /// </summary>
+        private void btnOrder_Click(object sender, RoutedEventArgs e)
+        {
+            // Load the Order view in the main window
+            ((MainWindow)Application.Current.MainWindow).LoadOrderView();
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+OrderView.xaml
+<UserControl x:Class="InventorySystemSoftware1.Views.OrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InventorySystemSoftware1.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Label for Stock Code -->
+        <TextBlock x:Name="lblCode" HorizontalAlignment="Left" Margin="40,10,0,0" TextWrapping="Wrap" Text="Code" VerticalAlignment="Top"/>
+
+        <!-- Label for Unit Quantity -->
+        <TextBlock x:Name="lblUnit" HorizontalAlignment="Left" Margin="305,10,0,0" TextWrapping="Wrap" Text="Unit" VerticalAlignment="Top"/>
+
+        <!-- ComboBox for selecting Stock Codes -->
+        <ComboBox x:Name="cmbCode" HorizontalAlignment="Left" Margin="110,10,0,0" VerticalAlignment="Top" Width="120" 
+                  ItemsSource="{Binding StockCodes}" SelectedItem="{Binding SelectedStockCode}" />
+
+        <!-- TextBox for entering Order Quantity -->
+        <TextBox x:Name="txtUnit" HorizontalAlignment="Left" Margin="380,8,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" 
+                 Text="{Binding OrderQuantity, UpdateSourceTrigger=PropertyChanged}" />
+
+        <!-- Button to add the order -->
+        <Button x:Name="btnAdd" Content="Add" HorizontalAlignment="Left" Margin="640,5,0,0" VerticalAlignment="Top" 
+                Command="{Binding AddOrderCommand}" />
+
+        <!-- DataGrid to display current orders -->
+        <DataGrid Grid.Row="1" Margin="40,10,40,10" AutoGenerateColumns="False" ItemsSource="{Binding Orders}" 
+                  SelectedItem="{Binding SelectedOrder}" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Code" Binding="{Binding StockCode}" Width="100"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding StockName}" Width="100"/>
+                <DataGridTextColumn Header="Count" Binding="{Binding Quantity}" Width="100"/>
+                <DataGridTextColumn Header="Price" Binding="{Binding TotalPrice}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Panel for deleting an order and displaying total amount -->
+        <Grid Grid.Row="2" Margin="40,10,40,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Button to delete selected order -->
+            <Button x:Name="btnDelete" Content="Delete" Width="55" HorizontalAlignment="Left" Margin="0,0,10,0" 
+                    Command="{Binding DeleteOrderCommand}" IsEnabled="{Binding Path=SelectedOrder}" />
+
+            <!-- Label for Total Amount -->
+            <TextBlock Grid.Column="2" Margin="10,0,0,0" TextWrapping="Wrap" Text="Total Amount" VerticalAlignment="Center"/>
+
+            <!-- TextBox to display total order amount -->
+            <TextBox x:Name="txtTotalAmount" Grid.Column="3" Width="120" Margin="10,0,0,0" IsReadOnly="True"
+                     Text="{Binding TotalOrderAmount}" />
+        </Grid>
+
+        <!-- Button to place the order -->
+        <Button x:Name="btnPlaceOrder" Content="Place Order" HorizontalAlignment="Right" Margin="40,10,40,10" Grid.Row="3"
+                Command="{Binding PlaceOrderCommand}" />
+    </Grid>
+</UserControl>
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+OrderView.xaml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using InventorySystemSoftware1.ViewModels;
+
+namespace InventorySystemSoftware1.Views
+{
+    /// <summary>
+    /// Interaction logic for OrderView.xaml
+    /// This UserControl represents the view for placing orders in the inventory system.
+    /// </summary>
+    public partial class OrderView : UserControl
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderView"/> class.
+        /// Sets the DataContext to the singleton instance of the OrderViewModel.
+        /// </summary>
+        public OrderView()
+        {
+            InitializeComponent();
+            // Set the DataContext to the OrderViewModel for data binding.
+            DataContext = OrderViewModel.Instance;
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+StockView.xaml
+<UserControl x:Class="InventorySystemSoftware1.Views.StockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InventorySystemSoftware1.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="800">
+
+    <!-- UserControl resources for converters -->
+    <UserControl.Resources>
+        <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Command buttons for adding, deleting, and editing stocks -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="0" Margin="0,20,40,20">
+            <Button Content="Add" Margin="5,0" Command="{Binding AddStockCommand}"/>
+            <Button Content="Delete" Margin="5,0" Command="{Binding DeleteStockCommand}" 
+                    IsEnabled="{Binding SelectedStock, Converter={StaticResource NullToBoolConverter}}"/>
+            <Button Content="Edit" Margin="5,0" Command="{Binding UpdateStockCommand}" 
+                    IsEnabled="{Binding SelectedStock, Converter={StaticResource NullToBoolConverter}}"/>
+        </StackPanel>
+
+        <!-- DataGrid for displaying stock items -->
+        <DataGrid Grid.Row="1" Margin="40,20,40,20" ItemsSource="{Binding Stocks}" 
+                  SelectedItem="{Binding SelectedStock, Mode=TwoWay}" AutoGenerateColumns="False"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Code" Binding="{Binding StockCode}" Width="100"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding StockName}" Width="100"/>
+                <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice}" Width="100"/>
+                <DataGridTextColumn Header="Stock Count" Binding="{Binding StockCount}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Input fields for editing stock details -->
+        <StackPanel Grid.Row="2" Orientation="Vertical" Margin="40,20,40,20" 
+                    Visibility="{Binding IsEditingEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+                <TextBlock Text="Code" Width="100" VerticalAlignment="Center"/>
+                <TextBox Width="120" Text="{Binding NewStock.StockCode, Mode=TwoWay}" 
+                         IsEnabled="{Binding IsStockSelected}"/>
+                <TextBlock Text="Name" Width="100" VerticalAlignment="Center" Margin="40,0,0,0"/>
+                <TextBox Width="120" Text="{Binding NewStock.StockName, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+                <TextBlock Text="Unit Price" Width="100" VerticalAlignment="Center"/>
+                <TextBox Width="120" Text="{Binding NewStock.UnitPrice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="Stock Count" Width="100" VerticalAlignment="Center" Margin="40,0,0,0"/>
+                <TextBox Width="120" Text="{Binding NewStock.StockCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <Button Content="Save" HorizontalAlignment="Right" Width="80" Margin="0,20,0,0" 
+                    Command="{Binding SaveStockCommand}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+StockView.xaml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using InventorySystemSoftware1.ViewModels;
+
+namespace InventorySystemSoftware1.Views
+{
+    /// <summary>
+    /// Interaction logic for StockView.xaml
+    /// </summary>
+    public partial class StockView : UserControl
+    {
+        // Constructor for StockView
+        public StockView()
+        {
+            InitializeComponent(); // Initialize the UI components
+            DataContext = StockViewModel.Instance; // Set the DataContext to the StockViewModel instance
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+MainWindow.xaml
+<Window x:Class="InventorySystemSoftware1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InventorySystemSoftware1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="2" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Expander for Home and Exit buttons -->
+            <Expander x:Name="ButtonExpander" IsExpanded="True" Grid.Row="0" Grid.ColumnSpan="3">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Name="HomeButton" Width="80" Height="40" 
+                        Margin="10,5" Click="HomeButton_Click" Grid.Column="0">
+                        <Button.Background>
+                            <ImageBrush ImageSource="/216242_home_icon.png"/>
+                        </Button.Background>
+                    </Button>
+
+                    <Button Name="ExitButton" Width="80" Height="40" 
+                        Margin="10,5" Click="ExitButton_Click" Grid.Column="2" RenderTransformOrigin="0.5,0.5">
+                        <Button.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform/>
+                                <RotateTransform Angle="179.202"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Button.RenderTransform>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/9104334_sign out_logout_exit_out_icon.png"/>
+                        </Button.Background>
+                    </Button>
+                </Grid>
+            </Expander>
+
+            <!-- Separator line -->
+            <Separator Grid.ColumnSpan="3" Grid.Row="2" Background="Black" Height="2" Margin="0"/>
+
+            <!-- ContentControl for displaying different views -->
+            <ContentControl x:Name="MainContent" Grid.Row="3" Grid.ColumnSpan="3" Margin="10"/>
+        </Grid>
+    </Grid>
+</Window>
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+MainWindow.xaml.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using InventorySystemSoftware1.Views;
+
+namespace InventorySystemSoftware1
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+            LoadDashboard(); // Load the dashboard by default
+        }
+
+        private void LoadDashboard()
+        {
+            MainContent.Content = new DashBoardView(); // Set the dashboard UserControl
+        }
+
+        public void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadDashboard(); // Load the dashboard UserControl
+        }
+
+        public void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown(); // Exit the application
+        }
+
+        // Method to load StockView
+        public void LoadStockView()
+        {
+            MainContent.Content = new StockView(); // Set the Stock UserControl
+        }
+
+        // Method to load OrderView
+        public void LoadOrderView()
+        {
+            MainContent.Content = new OrderView(); // Set the Order UserControl
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+RelayCommand.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
+
+namespace InventorySystemSoftware1
+{
+    public class RelayCommand : ICommand
+    {
+        private readonly Action _execute;
+        private readonly Func<bool> _canExecute;
+
+        public RelayCommand(Action execute, Func<bool> canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+        //
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+        //
+        public bool CanExecute(object parameter)
+        {
+            return _canExecute == null || _canExecute();
+        }
+
+        public void Execute(object parameter)
+        {
+            _execute();
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
